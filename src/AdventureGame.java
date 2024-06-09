@@ -1,33 +1,28 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.sound.sampled.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.io.File;
+
+import tasks.MusicTask;
+import tasks.GatheringTask;
+import tasks.HuntingTask;
+import tasks.BarteringTask;
 
 public class AdventureGame extends JFrame {
+    MusicTask musicTask = new MusicTask();
+    GatheringTask gatheringTask = new GatheringTask();
+    HuntingTask huntingTask = new HuntingTask();
+    BarteringTask barteringTask = new BarteringTask();
+    public boolean inTask = false;
     private static final int WINDOW_WIDTH = 800;
     private static final int WINDOW_HEIGHT = 600;
     private static final int PLAYER_SIZE = 20;
-    private static final int TASK_TIME_LIMIT = 10;
     private Image playerImage;
-
     private int playerX = 50;
     private int playerY = 50;
-    private int musicScore = 0;
-    private int gatherScore = 0;
-    private int huntScore = 0;
-    private int barterScore = 0;
-    private int noteIndex = 0;
-    private int taskTimer = 0;
+
     private int failureCount = 0;
-    private boolean inTask = false;
-    private boolean inMusicTask = false;
-    private boolean inGatheringTask = false;
-    private boolean inHuntingTask = false;
-    private boolean inBarteringTask = false;
     private boolean isDialogue = false;
     private boolean showMainScene = true;
     private boolean showTaskScene = false;
@@ -35,16 +30,13 @@ public class AdventureGame extends JFrame {
     private static final int MAX_FAILURES = 3;
     private String currentScenario = "START";
     private String currentCheckpoint = "C1";
-    private Timer taskTimerTimer;
-    private Timer animationTimer;
-    private Timer animalMovementTimer;
-    private List<Point> materials = new ArrayList<>();
-    private List<Point> animals = new ArrayList<>();
     private List<ChoicePoint> choicePoints = new ArrayList<>();
     private List<String> completedCheckpoints = new ArrayList<>();
+    public Timer taskTimerTimer;
+    public static final int TASK_TIME_LIMIT = 10;
 
-    private final String[] notes = {"a", "b", "c", "d", "e", "f", "g"};
-    private final char[] noteKeys = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
+    public Timer animationTimer;
+    public int taskTimer = 0;
 
     public AdventureGame() {
         setTitle("Mato’s Fur Trade Journey");
@@ -52,9 +44,10 @@ public class AdventureGame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        //player image
+        //image of player and icons for beavers
         try{
             playerImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Mato.png").getImage();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,10 +71,10 @@ public class AdventureGame extends JFrame {
                     taskTimer++;
                     if (taskTimer > TASK_TIME_LIMIT) {
                         inTask = false;
-                        inMusicTask = false;
-                        inGatheringTask = false;
-                        inHuntingTask = false;
-                        inBarteringTask = false;
+                        musicTask.inMusicTask = false;
+                        gatheringTask.inGatheringTask = false;
+                        huntingTask.inHuntingTask = false;
+                        barteringTask.inBarteringTask = false;
                         failureCount++;
                         JOptionPane.showMessageDialog(null, "Time's up! You failed the task. Try again.");
                         showMainScene = true;
@@ -135,172 +128,46 @@ public class AdventureGame extends JFrame {
         startTask(checkpoint);
     }
 
+
+
     private void startTask(String checkpoint) {
         isDialogue = false;
         showMainScene = false;
         showTaskScene = true;
+        taskTimer = 0;
+        inTask = true;
         switch (checkpoint) {
             case "C1":
-                startMusicTask();
+                musicTask.startMusicTask();
                 break;
             case "C2":
-                startGatheringTask();
+                gatheringTask.startGatheringTask();
                 break;
             case "C3":
-                startHuntingTask();
+                huntingTask.startHuntingTask(WINDOW_WIDTH, WINDOW_HEIGHT);
                 break;
             case "C4":
-                startBarteringTask();
+                barteringTask.startBarteringTask(failureCount);
+                String returnBarteringTask = barteringTask.startBarteringTask(failureCount);
+                if (!returnBarteringTask.isEmpty()) {
+                    completeTask(returnBarteringTask);
+                }
+
                 break;
         }
-    }
-
-    private void startMusicTask() {
-        inTask = true;
-        inMusicTask = true;
-        musicScore = 0;
-        noteIndex = 0;
-        taskTimer = 0;
-        JOptionPane.showMessageDialog(null, "Task: Play music to satisfy your elder in order to learn more about the history of fur trades.\nPress the keys in the order: a, b, c, d, e, f, g.");
-    }
-
-    public void play(char note) {
-        try {
-            // Construct the file path to the note's audio file
-            File f = new File(System.getProperty("user.dir") + "/resources/" + note + ".wav");
-
-            // Load the audio file
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(f);
-
-            // Create a clip to play the audio
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
-
-            // Wait for the clip to finish playing
-            clip.addLineListener(new LineListener() {
-                @Override
-                public void update(LineEvent event) {
-                    if (event.getType() == LineEvent.Type.STOP) {
-                        event.getLine().close();
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleMusicTask(char keyPressed) {
-        char expectedNote = noteKeys[noteIndex];
-        if (keyPressed == expectedNote) {
-            play(keyPressed); // Play the sound for the correct note
-            musicScore++;
-            noteIndex++;
-            if (noteIndex < notes.length) {
-                // Continue to the next note
-            } else {
-                inMusicTask = false;
-                completeTask("C1");
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "You played the wrong note! Try again.");
-            musicScore--;
-            noteIndex = 0;
-
-        }
         repaint();
-    }
-
-
-    private void startGatheringTask() {
-        inTask = true;
-        inGatheringTask = true;
-        gatherScore = 0;
-        taskTimer = 0;
-        materials.clear();
-
-        // Automatically place materials at random positions
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            materials.add(new Point(random.nextInt(WINDOW_WIDTH - PLAYER_SIZE), random.nextInt(WINDOW_HEIGHT - PLAYER_SIZE)));
-        }
-
-        JOptionPane.showMessageDialog(null, "Task: Collect 1 of each of the following - wood, braided sinew, sealskin, copper rivets, and animal bone. Click on the materials to collect them.");
-    }
-
-    private void startHuntingTask() {
-        inTask = true;
-        inHuntingTask = true;
-        huntScore = 0;
-        taskTimer = 0;
-        animals.clear();
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            animals.add(new Point(random.nextInt(WINDOW_WIDTH - 20), random.nextInt(WINDOW_HEIGHT - 20)));
-        }
-        JOptionPane.showMessageDialog(null, "Task: Hunt 5 beavers. Click on the moving beavers to hunt them.");
-
-        animalMovementTimer = new Timer (200, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                moveAnimals();
-            }
-        } );
-        animalMovementTimer.start();
-    }
-
-    private void moveAnimals() {
-        Random random = new Random();
-        for (Point animal : animals) {
-            animal.x = Math.max(0, Math.min(animal.x + random.nextInt(41) - 10, WINDOW_WIDTH - PLAYER_SIZE));
-            animal.y = Math.max(0, Math.min(animal.y + random.nextInt(41) - 10, WINDOW_HEIGHT - PLAYER_SIZE));
-        }
-        repaint();
-    }
-
-    private void startBarteringTask() {
-        inTask = true;
-        inBarteringTask = true;
-        barterScore = 0;
-        taskTimer = 0;
-        Random random = new Random();
-        int minPrice = random.nextInt(10) + 1;
-        int maxPrice = minPrice + random.nextInt(6) + 1;
-        JOptionPane.showMessageDialog(null, "Task: Make a successful trade. Enter a price to sell your beaver furs.");
-
-        boolean successfulTrade = false;
-
-        while(!successfulTrade) {
-            String input = JOptionPane.showInputDialog("Enter a price to sell your beaver furs (1-10):");
-            int price = Integer.parseInt(input);
-            if (price >= minPrice && price <= maxPrice) {
-                JOptionPane.showMessageDialog(null, "Successful trade! The trader was willing to buy the furs for " + minPrice + " - " + maxPrice + " dollars.");
-                barterScore = 1;
-                inBarteringTask = false;
-                completeTask("C4");
-                successfulTrade = true;
-            } else {
-                failureCount++;
-                if (price < minPrice) {
-                JOptionPane.showMessageDialog(null, "Trader: \"It's obviously not good quality if it's that cheap.\"");
-            } else {
-                JOptionPane.showMessageDialog(null, "Trader: \"So expensive! How arrogant!\"");
-            }}
-        }
-
     }
 
     private void completeTask(String checkpoint) {
         inTask = false;
-        inMusicTask = false;
-        inGatheringTask = false;
-        inHuntingTask = false;
-        inBarteringTask = false;
+        musicTask.inMusicTask = false;
+        gatheringTask.inGatheringTask = false;
+        huntingTask.inHuntingTask = false;
+        barteringTask.inBarteringTask = false;
         showMainScene = true;
         showTaskScene = false;
-        if(animalMovementTimer != null) {
-            animalMovementTimer.stop();
+        if(huntingTask.animalMovementTimer != null) {
+            huntingTask.animalMovementTimer.stop();
         }
         completedCheckpoints.add(checkpoint);
         currentCheckpoint = getNextCheckpoint();
@@ -346,18 +213,8 @@ public class AdventureGame extends JFrame {
     private void resetGame() {
         playerX = 50;
         playerY = 50;
-        musicScore = 0;
-        gatherScore = 0;
-        huntScore = 0;
-        barterScore = 0;
-        noteIndex = 0;
-        taskTimer = 0;
         failureCount = 0;
-        inTask = false;
-        inMusicTask = false;
-        inGatheringTask = false;
-        inHuntingTask = false;
-        inBarteringTask = false;
+        musicTask.resetTasks();//add the other methods
         isDialogue = false;
         showMainScene = true;
         showTaskScene = false;
@@ -365,6 +222,8 @@ public class AdventureGame extends JFrame {
         currentScenario = "START";
         currentCheckpoint = "C1";
         completedCheckpoints.clear();
+        taskTimer = 0;
+        inTask = false;
         choicePoints.clear();
         choicePoints.add(new ChoicePoint(200, 100, "C1", "Elder"));
         choicePoints.add(new ChoicePoint(300, 200, "C2", "Uncle"));
@@ -383,45 +242,20 @@ public class AdventureGame extends JFrame {
             g.drawImage(playerImage, playerX, playerY, PLAYER_SIZE + 30, PLAYER_SIZE+40, this);
         } else {
 
-        g.setColor(Color.BLUE);
-        g.fillRect(playerX, playerY, PLAYER_SIZE, PLAYER_SIZE);
-    }}
+            g.setColor(Color.BLUE);
+            g.fillRect(playerX, playerY, PLAYER_SIZE, PLAYER_SIZE);
+        }}
 
     private void drawTaskScene(Graphics g) {
-        if (inMusicTask) {
-            g.drawString("Play the notes in order: a, b, c, d, e, f, g", 10, 20);
-            for (int i = 0; i < notes.length; i++) {
-                if (i == noteIndex) {
-                    g.setColor(Color.RED); // Highlight the current note
-                } else {
-                    g.setColor(Color.BLACK);
-                }
-                g.drawString(notes[i], 10 + i * 15, 40);
-                g.drawRect(10 + i * 15, 30, 10, 20);
-            }
-        } else if (inGatheringTask) {
-            g.drawString("Gather materials", 10, 20);
-            g.drawString("Score: " + gatherScore, 10, 40);
-            g.drawString("Time remaining: " + (TASK_TIME_LIMIT - taskTimer) + " seconds", 10, 60);
-            g.setColor(Color.ORANGE);
-            for (Point material : materials) {
-                g.fillRect(material.x, material.y, PLAYER_SIZE, PLAYER_SIZE);
-            }
-        } else if (inHuntingTask) {
-            g.drawString("Hunt beavers", 10, 20);
-            g.drawString("Score: " + huntScore, 10, 40);
-            g.drawString("Time remaining: " + (TASK_TIME_LIMIT - taskTimer) + " seconds", 10, 60);
-            g.setColor(Color.RED);
-            for (Point animal : animals) {
-                g.fillRect(animal.x, animal.y, PLAYER_SIZE, PLAYER_SIZE);
-            }
-        } else if (inBarteringTask) {
-            g.drawString("Barter with the trading staff", 10, 20);
-            g.drawString("Score: " + barterScore, 10, 40);
-            g.drawString("Time remaining: " + (TASK_TIME_LIMIT - taskTimer) + " seconds", 10, 60);
-        }
-        g.drawString("Failures: " + failureCount, 10, 80);
-
+        if (musicTask.inMusicTask) {
+            musicTask.drawMusicTask(g);
+        } else if (gatheringTask.inGatheringTask) {
+            gatheringTask.drawGatheringTask(g, taskTimer, PLAYER_SIZE, TASK_TIME_LIMIT);
+        } else if (huntingTask.inHuntingTask) {
+            huntingTask.drawHuntingTask(g, taskTimer, PLAYER_SIZE, TASK_TIME_LIMIT);
+        } else if (barteringTask.inBarteringTask) {
+            barteringTask.drawBarteringTask(g, taskTimer, TASK_TIME_LIMIT);
+        } g.drawString("Failures: " + failureCount, 10, 80);
     }
 
     private class GamePanel extends JPanel {
@@ -440,6 +274,7 @@ public class AdventureGame extends JFrame {
             if (backgroundImage != null) {
                 g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
             }
+
             if (showMainScene) {
                 drawMainScene(g);
             } else if (showTaskScene) {
@@ -451,12 +286,13 @@ public class AdventureGame extends JFrame {
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-
-            if(inMusicTask && new String(noteKeys).indexOf(e.getKeyChar()) != -1) {
-                handleMusicTask(e.getKeyChar());
+            String returnMusicTask = musicTask.handleMusicTask(e.getKeyChar());
+            if (!returnMusicTask.isEmpty()) {
+                completeTask(returnMusicTask);
             }
+            repaint();
 
-            if (isDialogue || inTask) {
+            if (inTask || isDialogue) {
                 return;
             }
 
@@ -473,11 +309,6 @@ public class AdventureGame extends JFrame {
                     break;
                 case KeyEvent.VK_DOWN:
                     playerY = Math.min(playerY + 10, WINDOW_HEIGHT - PLAYER_SIZE);
-                    break;
-                default:
-                    if (inMusicTask && new String(noteKeys).indexOf(e.getKeyChar()) != -1) {
-                        handleMusicTask(e.getKeyChar());
-                    }
                     break;
             }
 
@@ -508,29 +339,16 @@ public class AdventureGame extends JFrame {
                 }
             }
 
-            if (inGatheringTask) { //if the player is in the gathering task
-                for (Point material : materials) { //for each material
-                    if (x >= material.x && x <= material.x + PLAYER_SIZE && y >= material.y && y <= material.y + PLAYER_SIZE) { //if the player is at the material
-                        gatherScore++; //increase the gather score
-                        materials.remove(material); //remove the material
-                        if (gatherScore == 5) { //if the gather score is 5
-                            inGatheringTask = false; //sets that the task has been completed
-                            completeTask("C2");
-                        }
-                        break;
-                    }
+            if (gatheringTask.inGatheringTask) { //if the player is in the gathering task
+                String returnGatheringTask = gatheringTask.gatheringMouseHandler(x, y, PLAYER_SIZE); //call the gathering mouse handler
+                if (!returnGatheringTask.isEmpty()) {
+                    completeTask(returnGatheringTask);
                 }
-            } else if (inHuntingTask) { //if the player is in the hunting task
-                for (Point animal : animals) { //for each animal, point represents the location
-                    if (x >= animal.x && x <= animal.x + PLAYER_SIZE && y >= animal.y && y <= animal.y + PLAYER_SIZE) { //if the player is at the animal
-                        huntScore++; //increase the hunt score
-                        animals.remove(animal); //remove the animal
-                        if (huntScore == 5) { //if the hunt score is 5
-                            inHuntingTask = false; //sets that the task has been completed
-                            completeTask("C3");
-                        }
-                        break;
-                    }
+
+            } else if (huntingTask.inHuntingTask) { //if the player is in the hunting task
+                String returnHuntingTask = huntingTask.huntingMouseHandler(x, y, PLAYER_SIZE); //call the hunting mouse handler
+                if (!returnHuntingTask.isEmpty()) {
+                    completeTask(returnHuntingTask);
                 }
             }
             repaint(); //reset the screen
@@ -616,7 +434,7 @@ public class AdventureGame extends JFrame {
                     case "C4":
                         g.drawImage(image, x, y, imageWidth, imageHeight, null);
                         break;
-            } }else {
+                } }else {
             }}
 
         public boolean contains(int px, int py) {
@@ -646,7 +464,7 @@ public class AdventureGame extends JFrame {
                 default:
                     return true;
             }
-    }}
+        }}
 
 
     public static void main(String[] args) {
