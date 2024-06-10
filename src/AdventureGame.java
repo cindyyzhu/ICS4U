@@ -4,12 +4,14 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//importing the other classes and packages
 import tasks.MusicTask;
 import tasks.GatheringTask;
 import tasks.HuntingTask;
 import tasks.BarteringTask;
 
 public class AdventureGame extends JFrame {
+    //initializes the tasks and constructors for the Adventure Game
     MusicTask musicTask = new MusicTask();
     GatheringTask gatheringTask = new GatheringTask();
     HuntingTask huntingTask = new HuntingTask();
@@ -22,7 +24,6 @@ public class AdventureGame extends JFrame {
     private Image endSceneImage;
     private int playerX = 50;
     private int playerY = 50;
-
     private int failureCount = 0;
     private boolean isDialogue = false;
     private boolean showMainScene = true;
@@ -39,12 +40,13 @@ public class AdventureGame extends JFrame {
     public int taskTimer = 0;
 
     public AdventureGame() {
+        //opening screen
         setTitle("Mato’s Fur Trade Journey");
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        //load images
+        //load player image in opening screen
         try{
             playerImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Mato.png").getImage();
 
@@ -326,7 +328,7 @@ public class AdventureGame extends JFrame {
             for (ChoicePoint choicePoint : choicePoints) {
                 if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(playerX, playerY)) {
                     currentCheckpoint = choicePoint.checkpoint;
-                    if (inTask == false) {
+                    if (!inTask) {
                     showDialogue(currentCheckpoint); }
                     break;
                 }

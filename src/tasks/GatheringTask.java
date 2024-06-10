@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.*;
 
 public class GatheringTask extends Tasks {
-    private HashMap <Image, Point> materialMap = new HashMap <Image, Point> ();
+    public HashMap <Image, Point> materialMap = new HashMap <> ();
 
     public GatheringTask() {
         try { materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/wood.png").getImage(), new Point(200, 400));

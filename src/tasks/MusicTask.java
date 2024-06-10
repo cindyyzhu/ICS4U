@@ -58,7 +58,7 @@ public class MusicTask extends Tasks {
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 

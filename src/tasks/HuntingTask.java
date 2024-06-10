@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.*;
 
 public class HuntingTask extends Tasks{
-    private java.util.List<Point> animals = new ArrayList<>();
+    public java.util.List<Point> animals = new ArrayList<>();
     public Timer animalMovementTimer;
 
     public Image beaverIcon;
@@ -19,6 +19,7 @@ public class HuntingTask extends Tasks{
             beaverIcon = new ImageIcon(System.getProperty("user.dir") + "/resources/beaver.png").getImage();
         }
         catch (Exception e) {
+
         }
     }
 
