@@ -11,15 +11,20 @@ public class MusicTask extends Tasks {
     private final char[] noteKeys = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
 
     public void drawMusicTask(Graphics g) {
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 250, 100);
+        g.setColor(Color.BLACK);
         g.drawString("Play the notes in order: a, b, c, d, e, f, g", 10, 20);
+        g.setColor (Color.WHITE);
+        g.fillRect(80, 230, 600, 100);
         for (int i = 0; i < notes.length; i++) {
             if (i == noteIndex) {
                 g.setColor(Color.RED); // Highlight the current note
             } else {
                 g.setColor(Color.BLACK);
             }
-            g.drawString(notes[i], 10 + i * 15, 40);
-            g.drawRect(10 + i * 15, 30, 10, 20);
+            g.drawString(notes[i], 140 + i * 80, 275);
+            g.drawOval(120 + i * 80, 250, 50, 50);
         }
     }
 

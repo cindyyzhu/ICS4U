@@ -19,6 +19,7 @@ public class AdventureGame extends JFrame {
     private static final int WINDOW_HEIGHT = 600;
     private static final int PLAYER_SIZE = 20;
     private Image playerImage;
+    private Image endSceneImage;
     private int playerX = 50;
     private int playerY = 50;
 
@@ -28,7 +29,6 @@ public class AdventureGame extends JFrame {
     private boolean showTaskScene = false;
     private boolean endScene = false;
     private static final int MAX_FAILURES = 3;
-    private String currentScenario = "START";
     private String currentCheckpoint = "C1";
     private List<ChoicePoint> choicePoints = new ArrayList<>();
     private List<String> completedCheckpoints = new ArrayList<>();
@@ -44,7 +44,7 @@ public class AdventureGame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        //image of player and icons for beavers
+        //load images
         try{
             playerImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Mato.png").getImage();
 
@@ -109,6 +109,7 @@ public class AdventureGame extends JFrame {
 
     private void showDialogue(String checkpoint) {
         isDialogue = true;
+
         String message = "";
         switch (checkpoint) {
             case "C1":
@@ -126,9 +127,8 @@ public class AdventureGame extends JFrame {
         }
         JOptionPane.showMessageDialog(null, message);
         startTask(checkpoint);
+
     }
-
-
 
     private void startTask(String checkpoint) {
         isDialogue = false;
@@ -147,10 +147,15 @@ public class AdventureGame extends JFrame {
                 huntingTask.startHuntingTask(WINDOW_WIDTH, WINDOW_HEIGHT);
                 break;
             case "C4":
-                barteringTask.startBarteringTask(failureCount);
-                String returnBarteringTask = barteringTask.startBarteringTask(failureCount);
+                String returnBarteringTask = barteringTask.startBarteringTask();
                 if (!returnBarteringTask.isEmpty()) {
                     completeTask(returnBarteringTask);
+                }
+                else{
+                    failureCount++;
+                    inTask = false;
+                    barteringTask.inBarteringTask = false;
+                    showMainScene = true;
                 }
 
                 break;
@@ -194,8 +199,15 @@ public class AdventureGame extends JFrame {
         if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") &&
                 completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
             endScene = true;
+            try {
+                endSceneImage = new ImageIcon(System.getProperty("user.dir") + "/resources/EndScene.jpeg").getImage();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            showMainScene = false;
+            showTaskScene = false;
             if (failureCount > MAX_FAILURES) {
-                JOptionPane.showMessageDialog(null, "Elder: Mato, I’m very disappointed in your clumsy skills.");
+                JOptionPane.showMessageDialog(null, "Elder: Mato, I’m very disappointed in your clumsy skills.\nClearly, you are not suited for the fur trade, as you've already failed " + failureCount + " times.");
                 int response = JOptionPane.showConfirmDialog(null, "System: Would you like to restart to try again to become a fur trader?", "Restart", JOptionPane.YES_NO_OPTION);
                 if (response == JOptionPane.YES_OPTION) {
                     resetGame();
@@ -219,7 +231,6 @@ public class AdventureGame extends JFrame {
         showMainScene = true;
         showTaskScene = false;
         endScene = false;
-        currentScenario = "START";
         currentCheckpoint = "C1";
         completedCheckpoints.clear();
         taskTimer = 0;
@@ -315,7 +326,8 @@ public class AdventureGame extends JFrame {
             for (ChoicePoint choicePoint : choicePoints) {
                 if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(playerX, playerY)) {
                     currentCheckpoint = choicePoint.checkpoint;
-                    showDialogue(currentCheckpoint);
+                    if (inTask == false) {
+                    showDialogue(currentCheckpoint); }
                     break;
                 }
             }
@@ -334,7 +346,9 @@ public class AdventureGame extends JFrame {
             for (ChoicePoint choicePoint : choicePoints) {
                 if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(x, y) && choicePoint.isAvailable()) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
                     currentCheckpoint = choicePoint.checkpoint;  //set the current checkpoint to the checkpoint the player is at
+                    if (inTask == false) {
                     showDialogue(currentCheckpoint); //show the dialogue for the checkpoint
+                         }
                     return;
                 }
             }

@@ -24,9 +24,15 @@ public class HuntingTask extends Tasks{
 
 
     public void drawHuntingTask (Graphics g, int taskTimer, int PLAYER_SIZE, int TASK_TIME_LIMIT){
-        g.drawString("Hunt beavers", 10, 20);
+
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 200, 100);
+
+        g.setColor(Color.BLACK);
+        g.drawString("TASK: Hunt 5 beavers!", 10, 20);
         g.drawString("Score: " + huntScore, 10, 40);
         g.drawString("Time remaining: " + (TASK_TIME_LIMIT - taskTimer) + " seconds", 10, 60);
+        g.setColor(Color.RED);
 
         for (Point animal : animals) {
             if (beaverIcon != null) {
