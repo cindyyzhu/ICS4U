@@ -7,7 +7,7 @@ import java.util.*;
 public class GatheringTask extends Tasks {
     public HashMap <Image, Point> materialMap = new HashMap <> ();
 
-    public GatheringTask() {
+   public GatheringTask() {
         try { materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/wood.png").getImage(), new Point(200, 400));
             materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sinew.png").getImage(), new Point(300, 200));
             materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sealskin.png").getImage(), new Point(400, 300));
@@ -43,7 +43,6 @@ public class GatheringTask extends Tasks {
         for (Image material : materialMap.keySet()) { //for each material
             Point location = materialMap.get(material); //get the location of the material
             if (x >= location.x && x <= location.x + PLAYER_SIZE +40 && y >= location.y && y <= location.y + PLAYER_SIZE+40) { //if the player is at the material
-                System.out.println("x: " + x + " y: " + y + " location.x: " + location.x + " location.y: " + location.y);
                 gatherScore++; //increase the gather score
                 materialMap.remove(material); //remove the material
                 if (gatherScore == 5) { //if the gather score is 5

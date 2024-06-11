@@ -40,7 +40,9 @@ public class AdventureGame extends JFrame {
     public int taskTimer = 0;
 
     private IntroductionPanel introductionPanel;
+    private InstructionPanel instructionPanel;
     private GamePanel gamePanel;
+    private EndScenePanel endScenePanel;
 
     private JLabel msgLabel;
 
@@ -53,7 +55,7 @@ public class AdventureGame extends JFrame {
 
 
         //load player image in opening screen
-        try{
+        try {
             playerImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Mato.png").getImage();
 
         } catch (Exception e) {
@@ -63,17 +65,24 @@ public class AdventureGame extends JFrame {
         //initialize
         msgLabel = new JLabel();
 
-        introductionPanel = new IntroductionPanel(this);
-        add(introductionPanel);
-
-        gamePanel = new GamePanel();
-        //add(gamePanel);
-        gamePanel.setVisible(false);
-        gamePanel.setEnabled(false);
         addKeyListener(new KeyHandler());
         addMouseListener(new MouseHandler());
         setFocusable(true); // Set the JFrame to focusable so it can receive key events
 
+        introductionPanel = new IntroductionPanel(this);
+        add(introductionPanel);
+
+        instructionPanel = new InstructionPanel(this);
+        instructionPanel.setVisible(false);
+        instructionPanel.setEnabled(false);
+
+        gamePanel = new GamePanel(this);
+        gamePanel.setVisible(false);
+        gamePanel.setEnabled(false);
+
+        endScenePanel = new EndScenePanel(this);
+        endScenePanel.setVisible(false);
+        endScenePanel.setEnabled(false);
 
         choicePoints.add(new ChoicePoint(200, 100, "C1", "Elder"));
         choicePoints.add(new ChoicePoint(300, 200, "C2", "Uncle"));
@@ -142,7 +151,7 @@ public class AdventureGame extends JFrame {
                 message = "Bartering Staff: Oh look, there’s a new face! But, first let’s make your first trade!";
                 break;
         }
-       // JOptionPane.showMessageDialog(null, message);
+        // JOptionPane.showMessageDialog(null, message);
         msgLabel.setText(message);
         msgLabel.setVisible(true);
         startTask(checkpoint);
@@ -169,8 +178,7 @@ public class AdventureGame extends JFrame {
                 String returnBarteringTask = barteringTask.startBarteringTask();
                 if (!returnBarteringTask.isEmpty()) {
                     completeTask(returnBarteringTask);
-                }
-                else{
+                } else {
                     failureCount++;
                     inTask = false;
                     barteringTask.inBarteringTask = false;
@@ -191,39 +199,12 @@ public class AdventureGame extends JFrame {
         barteringTask.inBarteringTask = false;
         showMainScene = true;
         showTaskScene = false;
-        if(huntingTask.animalMovementTimer != null) {
+        if (huntingTask.animalMovementTimer != null) {
             huntingTask.animalMovementTimer.stop();
         }
         completedCheckpoints.add(checkpoint);
         JOptionPane.showMessageDialog(null, "Congratulations! You completed the task successfully.");
         checkEndGame();
-    }
-
-    private void checkEndGame() {
-        if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") &&
-                completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
-            endScene = true;
-            try {
-                endSceneImage = new ImageIcon(System.getProperty("user.dir") + "/resources/EndScene.jpeg").getImage();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            showMainScene = false;
-            showTaskScene = false;
-            if (failureCount > MAX_FAILURES) {
-                JOptionPane.showMessageDialog(null, "Elder: Mato, I’m very disappointed in your clumsy skills.\nClearly, you are not suited for the fur trade, as you've already failed " + failureCount + " times.");
-                int response = JOptionPane.showConfirmDialog(null, "System: Would you like to restart to try again to become a fur trader?", "Restart", JOptionPane.YES_NO_OPTION);
-                if (response == JOptionPane.YES_OPTION) {
-                    resetGame();
-                } else {
-                    System.exit(0);
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Elder: Congratulations, Mato! I knew you’d succeed!");
-                JOptionPane.showMessageDialog(null, "Congratulations! Mato has become a full-fledged fur trader!");
-                System.exit(0);
-            }
-        }
     }
 
     private void resetGame() {
@@ -246,6 +227,7 @@ public class AdventureGame extends JFrame {
         choicePoints.add(new ChoicePoint(500, 400, "C4", "Trade Post"));
         showStartScreen();
     }
+
     private void drawMainScene(Graphics g) {
         for (ChoicePoint choicePoint : choicePoints) {
             if (!completedCheckpoints.contains(choicePoint.checkpoint)) {
@@ -253,13 +235,14 @@ public class AdventureGame extends JFrame {
             }
         }
 
-        if(playerImage != null) {
-            g.drawImage(playerImage, playerX, playerY, PLAYER_SIZE + 30, PLAYER_SIZE+40, this);
+        if (playerImage != null) {
+            g.drawImage(playerImage, playerX, playerY, PLAYER_SIZE + 30, PLAYER_SIZE + 40, this);
         } else {
 
             g.setColor(Color.BLUE);
             g.fillRect(playerX, playerY, PLAYER_SIZE, PLAYER_SIZE);
-        }}
+        }
+    }
 
     private void drawTaskScene(Graphics g) {
         if (musicTask.inMusicTask) {
@@ -270,33 +253,48 @@ public class AdventureGame extends JFrame {
             huntingTask.drawHuntingTask(g, taskTimer, PLAYER_SIZE, TASK_TIME_LIMIT);
         } else if (barteringTask.inBarteringTask) {
             barteringTask.drawBarteringTask(g, taskTimer, TASK_TIME_LIMIT);
-        } g.drawString("Failures: " + failureCount, 10, 80);
+        }
+        g.drawString("Failures: " + failureCount, 10, 80);
     }
 
-   private class IntroductionPanel extends JPanel {
+    private class IntroductionPanel extends JPanel {
         private Image backgroundImage;
 
         public IntroductionPanel(AdventureGame game) {
-            //button to go to the next screen
-            JButton startButton = new JButton("Start");
-            startButton.setBounds(350, 500, 100, 50);
+            setLayout(null);
+            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
 
-            //draw button
+            JLabel introLabel = new JLabel("<html>Welcome to Mato’s<br>Fur Trade Journey!</br></html>", SwingConstants.CENTER);
+            introLabel.setSize(400, 100);
+            introLabel.setLocation(200, 10);
+            introLabel.setFont(new Font("Arial", Font.BOLD, 30));
+            introLabel.setForeground(Color.BLACK);
+            add(introLabel);
+
+            //button to go to the next screen
+            JButton startButton = new JButton("Play!");
+            startButton.setSize(100, 50);
+            startButton.setLocation(350, 400);
+            startButton.setFont(new Font("Arial", Font.BOLD, 20));
+            startButton.setForeground(Color.BLACK);
+            startButton.setBackground(Color.WHITE);
             add(startButton);
+
+
             startButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     introductionPanel.setVisible(false);
                     introductionPanel.setEnabled(false);
-                    game.add(gamePanel);
-                    gamePanel.setVisible(true);
-                    gamePanel.setEnabled(true);
-                    //showInstructionsScreen();
+                    game.add(instructionPanel);
+                    instructionPanel.setVisible(true);
+                    instructionPanel.setEnabled(true);
+
                 }
             });
 
             try {
-                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Introduction.jpg").getImage();
+                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -306,20 +304,67 @@ public class AdventureGame extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            //button
-            g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("Click 'Start' to begin the game!", 300, 450);
             if (backgroundImage != null) {
                 g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
             }
 
         }
     }
+
+    private class InstructionPanel extends JPanel {
+        private Image backgroundImage;
+        private Image instructionText;
+
+        public InstructionPanel(AdventureGame game) {
+            setLayout(null);
+            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+
+            //button to go to the next screen
+            JButton startButton = new JButton("Play!");
+            startButton.setSize(100, 50);
+            startButton.setLocation(350, 450);
+            startButton.setFont(new Font("Arial", Font.BOLD, 20));
+            startButton.setForeground(Color.BLACK);
+            startButton.setBackground(Color.WHITE);
+            add(startButton);
+
+
+            startButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    instructionPanel.setVisible(false);
+                    instructionPanel.setEnabled(false);
+                    game.add(gamePanel);
+                    gamePanel.setVisible(true);
+                    gamePanel.setEnabled(true);
+
+                }
+            });
+
+            try {
+                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
+                instructionText = new ImageIcon(System.getProperty("user.dir") + "/resources/Instruction-text.png").getImage();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+                g.drawImage(instructionText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            }
+
+        }
+    }
+
     private class GamePanel extends JPanel {
         private Image backgroundImage;
 
-        public GamePanel() {
+        public GamePanel(AdventureGame game) {
             add(msgLabel);
             msgLabel.setBounds(500, 500, 800, 50);
             msgLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -330,7 +375,16 @@ public class AdventureGame extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+           /* if (endScene) {
+                gamePanel.setVisible(false);
+                gamePanel.setEnabled(false);
+                game.add(endScenePanel);
+                endScenePanel.setVisible(true);
+                endScenePanel.setEnabled(true);
+            }*/
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -343,8 +397,172 @@ public class AdventureGame extends JFrame {
             } else if (showTaskScene) {
                 drawTaskScene(g);
             }
+            /*else if (endScene) {
+                drawEndScene(AdventureGame.this);
+            }*/
         }
     }
+
+    private void checkEndGame() {
+        if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") &&
+                completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
+            endScene = true;
+            endScenePanel.setVisible(true);
+            endScenePanel.setEnabled(true);
+            endScenePanel.repaint();
+            endScenePanel.revalidate();
+            gamePanel.setVisible(false);
+            gamePanel.setEnabled(false);
+            taskTimerTimer.stop();
+            animationTimer.stop();
+
+
+            /*try {
+                endSceneImage = new ImageIcon(System.getProperty("user.dir") + "/resources/EndScene.jpeg").getImage();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            showMainScene = false;
+            showTaskScene = false;
+            if (failureCount > MAX_FAILURES) {
+                JOptionPane.showMessageDialog(null, "Elder: Mato, I’m very disappointed in your clumsy skills.\nClearly, you are not suited for the fur trade, as you've already failed " + failureCount + " times.");
+                int response = JOptionPane.showConfirmDialog(null, "System: Would you like to restart to try again to become a fur trader?", "Restart", JOptionPane.YES_NO_OPTION);
+                if (response == JOptionPane.YES_OPTION) {
+                    resetGame();
+                } else {
+                    System.exit(0);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Elder: Congratulations, Mato! I knew you’d succeed!");
+                JOptionPane.showMessageDialog(null, "Congratulations! Mato has become a full-fledged fur trader!");
+                System.exit(0);
+            }*/
+        }
+    }
+
+   /* private class failedEndScenePanel extends JPanel {
+        private Image backgroundImage;
+        public FailedEndScenePanel (AdventureGame game) {
+            setLayout(null);
+            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+
+            //button to go to the next screen
+            JButton startButton = new JButton("Play!");
+            startButton.setSize(100, 50);
+            startButton.setLocation(350, 450);
+            startButton.setFont(new Font("Arial", Font.BOLD, 20));
+            startButton.setForeground(Color.BLACK);
+            startButton.setBackground(Color.WHITE);
+            add(startButton);
+
+
+            startButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    instructionPanel.setVisible(false);
+                    instructionPanel.setEnabled(false);
+                    game.add(gamePanel);
+                    gamePanel.setVisible(true);
+                    gamePanel.setEnabled(true);
+
+                }
+            });
+
+            try {
+                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
+                failedEndSceneText = new ImageIcon(System.getProperty("user.dir") + "/resources/Instruction-text.png").getImage();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+                g.drawImage(failedEndSceneText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            }
+
+        }
+        }
+    }*/
+
+    /*private void drawEndScene(AdventureGame game) {
+        gamePanel.setVisible(false);
+        gamePanel.setEnabled(false);
+        game.add(endScenePanel);
+        endScenePanel.setVisible(true);
+        endScenePanel.setEnabled(true);
+    }*/
+
+    private class EndScenePanel extends JPanel {
+        private Image backgroundImage;
+        private Image endScenePanelText;
+
+        public EndScenePanel(AdventureGame game) {
+            setLayout(null);
+            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+
+            //button to exit the game
+            JButton exitButton = new JButton("Leave game?");
+            exitButton.setSize(100, 50);
+            exitButton.setSize(100, 50);
+            exitButton.setLocation(350, 400);
+            exitButton.setFont(new Font("Arial", Font.BOLD, 20));
+            exitButton.setForeground(Color.BLACK);
+            exitButton.setBackground(Color.WHITE);
+            add(exitButton);
+
+            //button to play again
+            JButton playAgainButton = new JButton("Play Again!");
+            playAgainButton.setSize(100, 50);
+            playAgainButton.setSize(100, 50);
+            playAgainButton.setLocation(350, 400);
+            playAgainButton.setFont(new Font("Arial", Font.BOLD, 20));
+            playAgainButton.setForeground(Color.BLACK);
+            playAgainButton.setBackground(Color.WHITE);
+            add(playAgainButton);
+
+            exitButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //leave the game
+                    System.exit(0);
+                }
+            });
+
+            playAgainButton.addActionListener (new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //play the game again
+                    resetGame();
+                }
+            });
+
+            try {
+                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
+                endScenePanelText = new ImageIcon(System.getProperty("user.dir") + "/resources/endScenePanelText.png").getImage();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+                g.drawImage(endScenePanelText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            }
+
+        }
+
+        }
+
+
 
     private class KeyHandler extends KeyAdapter {
         @Override
@@ -404,7 +622,6 @@ public class AdventureGame extends JFrame {
                 if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(x, y)) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
                     currentCheckpoint = choicePoint.checkpoint;  //set the current checkpoint to the checkpoint the player is at
                     showDialogue(currentCheckpoint); //show the dialogue for the checkpoint
-                    System.out.println(choicePoint.checkpoint);
 
                     return;
                 }
