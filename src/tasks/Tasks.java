@@ -8,7 +8,6 @@ public class Tasks {
     public boolean inBarteringTask = false;
     public int gatherScore = 0;
     public int musicScore = 0;
-
     public int huntScore = 0;
     public int barterScore = 0;
 

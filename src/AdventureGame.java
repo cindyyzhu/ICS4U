@@ -39,12 +39,18 @@ public class AdventureGame extends JFrame {
     public Timer animationTimer;
     public int taskTimer = 0;
 
+    private IntroductionPanel introductionPanel;
+    private GamePanel gamePanel;
+
+    private JLabel msgLabel;
+
     public AdventureGame() {
         //opening screen
         setTitle("Mato’s Fur Trade Journey");
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
 
         //load player image in opening screen
         try{
@@ -54,11 +60,20 @@ public class AdventureGame extends JFrame {
             e.printStackTrace();
         }
 
-        GamePanel gamePanel = new GamePanel();
-        add(gamePanel);
+        //initialize
+        msgLabel = new JLabel();
+
+        introductionPanel = new IntroductionPanel(this);
+        add(introductionPanel);
+
+        gamePanel = new GamePanel();
+        //add(gamePanel);
+        gamePanel.setVisible(false);
+        gamePanel.setEnabled(false);
         addKeyListener(new KeyHandler());
         addMouseListener(new MouseHandler());
-        setFocusable(true);
+        setFocusable(true); // Set the JFrame to focusable so it can receive key events
+
 
         choicePoints.add(new ChoicePoint(200, 100, "C1", "Elder"));
         choicePoints.add(new ChoicePoint(300, 200, "C2", "Uncle"));
@@ -97,7 +112,7 @@ public class AdventureGame extends JFrame {
         });
         animationTimer.start();
 
-        showStartScreen();
+        //showStartScreen();
     }
 
     private void showStartScreen() {
@@ -127,7 +142,9 @@ public class AdventureGame extends JFrame {
                 message = "Bartering Staff: Oh look, there’s a new face! But, first let’s make your first trade!";
                 break;
         }
-        JOptionPane.showMessageDialog(null, message);
+       // JOptionPane.showMessageDialog(null, message);
+        msgLabel.setText(message);
+        msgLabel.setVisible(true);
         startTask(checkpoint);
 
     }
@@ -166,6 +183,7 @@ public class AdventureGame extends JFrame {
     }
 
     private void completeTask(String checkpoint) {
+        msgLabel.setVisible(false);
         inTask = false;
         musicTask.inMusicTask = false;
         gatheringTask.inGatheringTask = false;
@@ -177,24 +195,8 @@ public class AdventureGame extends JFrame {
             huntingTask.animalMovementTimer.stop();
         }
         completedCheckpoints.add(checkpoint);
-        currentCheckpoint = getNextCheckpoint();
         JOptionPane.showMessageDialog(null, "Congratulations! You completed the task successfully.");
         checkEndGame();
-    }
-
-    private String getNextCheckpoint() {
-        switch (currentCheckpoint) {
-            case "C1":
-                return "C2";
-            case "C2":
-                return "C3";
-            case "C3":
-                return "C4";
-            case "C4":
-                return "";
-            default:
-                return "";
-        }
     }
 
     private void checkEndGame() {
@@ -271,10 +273,58 @@ public class AdventureGame extends JFrame {
         } g.drawString("Failures: " + failureCount, 10, 80);
     }
 
+   private class IntroductionPanel extends JPanel {
+        private Image backgroundImage;
+
+        public IntroductionPanel(AdventureGame game) {
+            //button to go to the next screen
+            JButton startButton = new JButton("Start");
+            startButton.setBounds(350, 500, 100, 50);
+
+            //draw button
+            add(startButton);
+            startButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    introductionPanel.setVisible(false);
+                    introductionPanel.setEnabled(false);
+                    game.add(gamePanel);
+                    gamePanel.setVisible(true);
+                    gamePanel.setEnabled(true);
+                    //showInstructionsScreen();
+                }
+            });
+
+            try {
+                backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Introduction.jpg").getImage();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            //button
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Click 'Start' to begin the game!", 300, 450);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+            }
+
+        }
+    }
     private class GamePanel extends JPanel {
         private Image backgroundImage;
 
         public GamePanel() {
+            add(msgLabel);
+            msgLabel.setBounds(500, 500, 800, 50);
+            msgLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            msgLabel.setVisible(false);
+
             try {
                 backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village.jpg").getImage();
             } catch (Exception e) {
@@ -299,6 +349,8 @@ public class AdventureGame extends JFrame {
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
+            //msgLabel.setVisible(false);
+
             String returnMusicTask = musicTask.handleMusicTask(e.getKeyChar());
             if (!returnMusicTask.isEmpty()) {
                 completeTask(returnMusicTask);
@@ -344,16 +396,19 @@ public class AdventureGame extends JFrame {
             int x = event.getX() - getInsets().left; //this will get the x and y coordinates of the mouse click and subtract the insets (the border) from the x and y coordinates
             int y = event.getY() - getInsets().top;
 
+            //msgLabel.setVisible(false);
+
+            if (!inTask){
             //for checkpoints to determine whether the player is at a checkpoint
             for (ChoicePoint choicePoint : choicePoints) {
-                if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(x, y) && choicePoint.isAvailable()) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
+                if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(x, y)) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
                     currentCheckpoint = choicePoint.checkpoint;  //set the current checkpoint to the checkpoint the player is at
-                    if (inTask == false) {
                     showDialogue(currentCheckpoint); //show the dialogue for the checkpoint
-                         }
+                    System.out.println(choicePoint.checkpoint);
+
                     return;
                 }
-            }
+            }}
 
             if (gatheringTask.inGatheringTask) { //if the player is in the gathering task
                 String returnGatheringTask = gatheringTask.gatheringMouseHandler(x, y, PLAYER_SIZE); //call the gathering mouse handler
@@ -361,10 +416,12 @@ public class AdventureGame extends JFrame {
                     completeTask(returnGatheringTask);
                 }
 
-            } else if (huntingTask.inHuntingTask) { //if the player is in the hunting task
+            }
+            if (huntingTask.inHuntingTask) { //if the player is in the hunting task
                 String returnHuntingTask = huntingTask.huntingMouseHandler(x, y, PLAYER_SIZE); //call the hunting mouse handler
                 if (!returnHuntingTask.isEmpty()) {
                     completeTask(returnHuntingTask);
+
                 }
             }
             repaint(); //reset the screen
@@ -465,21 +522,6 @@ public class AdventureGame extends JFrame {
                 return true;
             }
             return false;
-        }
-
-
-        public boolean isAvailable() {
-            // Check if the previous checkpoint is completed
-            switch (checkpoint) {
-                case "C2":
-                    return completedCheckpoints.contains("C1");
-                case "C3":
-                    return completedCheckpoints.contains("C2");
-                case "C4":
-                    return completedCheckpoints.contains("C3");
-                default:
-                    return true;
-            }
         }}
 
 
@@ -489,4 +531,4 @@ public class AdventureGame extends JFrame {
             game.setVisible(true);
         });
     }
-}
+    }

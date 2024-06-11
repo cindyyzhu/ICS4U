@@ -15,11 +15,12 @@ public class GatheringTask extends Tasks {
             materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/bone.png").getImage(), new Point(600, 200));
 
         } catch (Exception e) {
+            e.printStackTrace();
         }}
 
     public void drawGatheringTask (Graphics g, int taskTimer, int PLAYER_SIZE, int TASK_TIME_LIMIT){
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 250, 100);
+        g.fillRect(0, 0, 250, 100); //white rectangle to see the black text on the background
 
         g.setColor(Color.BLACK);
         g.drawString("TASK: Gather materials needed for a bow!", 10, 20);
@@ -42,6 +43,7 @@ public class GatheringTask extends Tasks {
         for (Image material : materialMap.keySet()) { //for each material
             Point location = materialMap.get(material); //get the location of the material
             if (x >= location.x && x <= location.x + PLAYER_SIZE +40 && y >= location.y && y <= location.y + PLAYER_SIZE+40) { //if the player is at the material
+                System.out.println("x: " + x + " y: " + y + " location.x: " + location.x + " location.y: " + location.y);
                 gatherScore++; //increase the gather score
                 materialMap.remove(material); //remove the material
                 if (gatherScore == 5) { //if the gather score is 5
