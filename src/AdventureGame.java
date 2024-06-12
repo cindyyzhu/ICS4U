@@ -105,7 +105,7 @@ public class AdventureGame extends JFrame {
                         JOptionPane.showMessageDialog(null, "Time's up! You failed the task. Try again.");
                         showMainScene = true;
                         showTaskScene = false;
-                        checkEndGame();
+                        checkEndGame(AdventureGame.this);
                     }
                 }
             }
@@ -204,10 +204,10 @@ public class AdventureGame extends JFrame {
         }
         completedCheckpoints.add(checkpoint);
         JOptionPane.showMessageDialog(null, "Congratulations! You completed the task successfully.");
-        checkEndGame();
+        checkEndGame(AdventureGame.this);
     }
 
-    private void resetGame() {
+    private void resetGame(AdventureGame game) {
         playerX = 50;
         playerY = 50;
         failureCount = 0;
@@ -225,7 +225,9 @@ public class AdventureGame extends JFrame {
         choicePoints.add(new ChoicePoint(300, 200, "C2", "Uncle"));
         choicePoints.add(new ChoicePoint(400, 300, "C3", "Father"));
         choicePoints.add(new ChoicePoint(500, 400, "C4", "Trade Post"));
-        showStartScreen();
+        game.add(introductionPanel);
+        introductionPanel.setVisible(true);
+        introductionPanel.setEnabled(true);
     }
 
     private void drawMainScene(Graphics g) {
@@ -274,7 +276,7 @@ public class AdventureGame extends JFrame {
             //button to go to the next screen
             JButton startButton = new JButton("Play!");
             startButton.setSize(100, 50);
-            startButton.setLocation(350, 400);
+            startButton.setLocation(350, 450);
             startButton.setFont(new Font("Arial", Font.BOLD, 20));
             startButton.setForeground(Color.BLACK);
             startButton.setBackground(Color.WHITE);
@@ -320,7 +322,7 @@ public class AdventureGame extends JFrame {
             setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
 
             //button to go to the next screen
-            JButton startButton = new JButton("Play!");
+            JButton startButton = new JButton("Got It!");
             startButton.setSize(100, 50);
             startButton.setLocation(350, 450);
             startButton.setFont(new Font("Arial", Font.BOLD, 20));
@@ -403,14 +405,15 @@ public class AdventureGame extends JFrame {
         }
     }
 
-    private void checkEndGame() {
+    private void checkEndGame(AdventureGame game) {
         if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") &&
                 completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
             endScene = true;
             endScenePanel.setVisible(true);
             endScenePanel.setEnabled(true);
-            endScenePanel.repaint();
-            endScenePanel.revalidate();
+            game.add(endScenePanel);
+            //endScenePanel.repaint();
+            //endScenePanel.revalidate();
             gamePanel.setVisible(false);
             gamePanel.setEnabled(false);
             taskTimerTimer.stop();
@@ -506,10 +509,9 @@ public class AdventureGame extends JFrame {
             setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
 
             //button to exit the game
-            JButton exitButton = new JButton("Leave game?");
-            exitButton.setSize(100, 50);
-            exitButton.setSize(100, 50);
-            exitButton.setLocation(350, 400);
+            JButton exitButton = new JButton("Exit Game");
+            exitButton.setSize(200, 50);
+            exitButton.setLocation(150, 450);
             exitButton.setFont(new Font("Arial", Font.BOLD, 20));
             exitButton.setForeground(Color.BLACK);
             exitButton.setBackground(Color.WHITE);
@@ -517,9 +519,8 @@ public class AdventureGame extends JFrame {
 
             //button to play again
             JButton playAgainButton = new JButton("Play Again!");
-            playAgainButton.setSize(100, 50);
-            playAgainButton.setSize(100, 50);
-            playAgainButton.setLocation(350, 400);
+            playAgainButton.setSize(200, 50);
+            playAgainButton.setLocation(450, 450);
             playAgainButton.setFont(new Font("Arial", Font.BOLD, 20));
             playAgainButton.setForeground(Color.BLACK);
             playAgainButton.setBackground(Color.WHITE);
@@ -537,7 +538,10 @@ public class AdventureGame extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     //play the game again
-                    resetGame();
+                    resetGame(AdventureGame.this);
+                    game.add(introductionPanel);
+                    endScenePanel.setVisible(false);
+                    endScenePanel.setEnabled(false);
                 }
             });
 
