@@ -69,8 +69,7 @@ public class MusicTask extends Tasks {
     }
 
     public String handleMusicTask(char keyPressed) {
-        if (inMusicTask && new String(noteKeys).indexOf(keyPressed) != -1) {
-
+        if (inMusicTask){
             char expectedNote = noteKeys[noteIndex];
             if (keyPressed == expectedNote) {
                 play(keyPressed); // Play the sound for the correct note
@@ -81,10 +80,10 @@ public class MusicTask extends Tasks {
                     inMusicTask = false;
                     return "C1";
                 }
-            } else {
+            } else if (keyPressed != expectedNote) {
                 JOptionPane.showMessageDialog(null, "You played the wrong note! Try again.");
                 noteIndex = 0;
-                return "";
+                return "WrongNote";
             }
 
         }

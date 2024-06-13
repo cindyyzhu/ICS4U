@@ -43,7 +43,7 @@ public class AdventureGame extends JFrame {
     private final List<String> completedCheckpoints = new ArrayList<>();
     
     //time limit for the hunting and gathering tasks
-    public static final int taskTimeLimit = 1000000000;
+    public static final int taskTimeLimit = 10;
     public Timer taskTimerTimer;
     public Timer animationTimer;
     public int taskTimer = 0;
@@ -110,7 +110,7 @@ public class AdventureGame extends JFrame {
         taskTimerTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (inTask) {
+                if (inTask && !musicTask.inMusicTask && !barteringTask.inBarteringTask){
                     taskTimer++;
                     if (taskTimer > taskTimeLimit) {
                         inTask = false;
@@ -120,8 +120,12 @@ public class AdventureGame extends JFrame {
                         JOptionPane.showMessageDialog(null, "Time's up! You failed the task. Try again.");
                         showMainScene = true;
                         showTaskScene = false;
+                        taskTimer = 0;
                         checkEndGame(AdventureGame.this);
+                        msgLabel.setVisible(false);
+
                     }
+                    repaint();
                 }
             }
         });
@@ -131,7 +135,9 @@ public class AdventureGame extends JFrame {
         animationTimer = new Timer(16, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                gamePanel.repaint();
+                if (huntingTask.inHuntingTask) {
+                
+                gamePanel.repaint(); }
             }
         });
         animationTimer.start();
@@ -143,41 +149,30 @@ public class AdventureGame extends JFrame {
         Image dialogueText;
         String checkPointImage = "";
 
-        dialogueText = new ImageIcon(System.getProperty("user.dir") + "/resources/" + checkPointImage + ".png").getImage();
-
-        String message = "";
-
         switch (checkpoint) {
             case "C1":
                 checkPointImage = "C1";
-               // message = "Elder: Hello Mato, so I hear you’ve been wanting to become a fur trader like your father… But before you can do that, you must first learn the history behind the fur trade in our community. To learn more about this, why don’t you play some traditional Anishinaabeg music on our flutes?";
                 break;
             case "C2":
                 checkPointImage = "C2";
-              //  message = "Uncle: Hello Mato, so you’ve wanted to learn how to make a bow? Well, oh ho ho, before you can do that, you must collect the materials to make a bow!";
                 break;
             case "C3":
                 checkPointImage = "C3";
-               // message = "Father: Hello Mato, ready to hunt? Let’s go!";
                 break;
             case "C4":
                 checkPointImage = "C4";
-              //  message = "Bartering Staff: Oh look, there’s a new face! But, first let’s make your first trade!";
                 break;
         }
-        // JOptionPane.showMessageDialog(null, message);
-       // msgLabel.setText(message);
-        //msgLabel.setVisible(true);
+        dialogueText = new ImageIcon(System.getProperty("user.dir") + "/resources/" + checkPointImage + ".png").getImage();
+        Image scaledImage = dialogueText.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
+
+        msgLabel.setIcon(new ImageIcon(scaledImage));
         startTask(checkpoint);
+        msgLabel.setVisible(inTask);
 
     }
 
     private void startTask(String checkpoint) {
-        isDialogue = false;
-        showMainScene = false;
-        showTaskScene = true;
-        taskTimer = 0;
-        inTask = true;
         switch (checkpoint) {
             case "C1":
                 musicTask.startMusicTask();
@@ -193,7 +188,14 @@ public class AdventureGame extends JFrame {
 
                 break;
         }
+        
+        isDialogue = false;
+        showMainScene = false;
+        showTaskScene = true;
+        taskTimer = 0;
+        inTask = true;
         repaint();
+        
     }
     
     //method to complete the task
@@ -212,6 +214,7 @@ public class AdventureGame extends JFrame {
         completedCheckpoints.add(checkpoint);
         JOptionPane.showMessageDialog(null, "Congratulations! You completed the task successfully.");
         checkEndGame(AdventureGame.this);
+      //  
     }
 
     //resets the game if the user wants to play again
@@ -229,6 +232,8 @@ public class AdventureGame extends JFrame {
         currentCheckpoint = "C1";
         completedCheckpoints.clear();
         taskTimer = 0;
+        taskTimerTimer.restart();
+        animationTimer.restart();
         inTask = false;
         choicePoints.clear();
         choicePoints.add(new ChoicePoint(200, 100, "C1", "Elder"));
@@ -238,6 +243,7 @@ public class AdventureGame extends JFrame {
         game.add(introductionPanel);
         introductionPanel.setVisible(true);
         introductionPanel.setEnabled(true);
+        
     }
 
     //draws the main scene with all the different checkpoints
@@ -270,6 +276,7 @@ public class AdventureGame extends JFrame {
             barteringTask.drawBarteringTask(g);
         }
         g.drawString("Failures: " + failureCount, 10, 80);
+
     }
 
     //introductory panel scene
@@ -356,7 +363,7 @@ public class AdventureGame extends JFrame {
                     game.add(gamePanel);
                     gamePanel.setVisible(true);
                     gamePanel.setEnabled(true);
-
+                    
                 }
             });
 
@@ -386,8 +393,8 @@ public class AdventureGame extends JFrame {
 
         public GamePanel(AdventureGame game) {
             add(msgLabel);
-            msgLabel.setBounds(500, 500, 800, 50);
-            msgLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            msgLabel.setBounds(0, 0, 100, 100);
+          //  msgLabel.setFont(new Font("Arial", Font.BOLD, 20));
             msgLabel.setVisible(false);
 
             try {
@@ -403,13 +410,16 @@ public class AdventureGame extends JFrame {
             if (backgroundImage != null) {
                 g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
             }
-            
+
+
             //draws the different scenes depending on what is currently in progress
             if (showMainScene) { 
                 drawMainScene(g);
-            } else if (showTaskScene) {
+            }
+            else if (showTaskScene) {
                 drawTaskScene(g);
             }
+
         }
     }
 
@@ -433,6 +443,7 @@ public class AdventureGame extends JFrame {
                 gamePanel.setVisible(false);
                 gamePanel.setEnabled(false);
             }
+
         }
     }
 
@@ -560,13 +571,19 @@ public class AdventureGame extends JFrame {
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            
+
+            if (msgLabel.isVisible()) {
+                msgLabel.setVisible(false);
+                taskTimer = 0;
+                taskTimerTimer.restart();
+            }
+
             //allows the music task to take input from keyboard to play the notes
             String returnMusicTask = musicTask.handleMusicTask(e.getKeyChar());
-            if (!returnMusicTask.isEmpty()) { //depending on what the music task returns, will mark the task as complete
+            if (returnMusicTask == "C1") { //depending on what the music task returns, will mark the task as complete
                 completeTask(returnMusicTask);
             }
-            else{
+            else if (returnMusicTask == "WrongNote"){
                 failureCount++;
             }
             repaint();
@@ -613,6 +630,7 @@ public class AdventureGame extends JFrame {
             int x = event.getX() - getInsets().left; //this will get the x and y coordinates of the mouse click and subtract the insets (the border) from the x and y coordinates
             int y = event.getY() - getInsets().top;
             
+            
             if (!inTask){ //if the user is not in a task, so the dialogue won't pop up during the task
             //for checkpoints to determine whether the player is at a checkpoint
             for (ChoicePoint choicePoint : choicePoints) {
@@ -623,6 +641,12 @@ public class AdventureGame extends JFrame {
                     return;
                 }
             }}
+
+            if (msgLabel.isVisible()) {
+                msgLabel.setVisible(false);
+                taskTimer = 0;
+                taskTimerTimer.restart();
+            }
 
             if (gatheringTask.inGatheringTask) { //if the player is in the gathering task
                 String returnGatheringTask = gatheringTask.gatheringMouseHandler(x, y, playerSize); //call the gathering mouse handler

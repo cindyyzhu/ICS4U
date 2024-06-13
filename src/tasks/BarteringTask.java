@@ -7,6 +7,7 @@ import java.util.*;
 
 public class BarteringTask extends Tasks {
     private ArrayList<Item> items;
+
     private int height = 200;
     private int width = 200;
     private Item sortAscButton;
@@ -29,9 +30,6 @@ public class BarteringTask extends Tasks {
         items.add(new Item("Imported Mirror", new ImageIcon(System.getProperty("user.dir") + "/resources/Mirror.png"), random.nextInt(10) + 1, 500, 180));
         items.add(new Item("Glass Beads", new ImageIcon(System.getProperty("user.dir") + "/resources/GlassBeads.png"), random.nextInt(10) + 1, 700, 180));
 
-        for (int i = 0; i < items.size(); i++) {
-            System.out.println("Name" + items.get(i).getName() + "Price " + items.get(i).getPrice());
-        }
     }
 
     public void drawBarteringTask(Graphics g) {
@@ -53,6 +51,7 @@ public class BarteringTask extends Tasks {
             g.drawImage(item.getImage().getImage(), item.getLocation().x - 100, item.getLocation().y, width, height, null);
             g.drawString(item.getName(), item.getLocation().x - 40, item.getLocation().y + height + 20);
         }
+
         g.drawImage(sortAscButton.getImage().getImage(), sortAscButton.getLocation().x, sortAscButton.getLocation().y, 100, 40, null);
         g.drawImage(sortDesButton.getImage().getImage(), sortDesButton.getLocation().x, sortDesButton.getLocation().y, 100, 40, null);
 
@@ -61,23 +60,22 @@ public class BarteringTask extends Tasks {
 
     private boolean handleItemSelection(Item item) {
         JFrame f = new JFrame();
-        ImageIcon icon = new ImageIcon("Beaver.jpg");
-        icon = new ImageIcon(icon.getImage().getScaledInstance(150, 100, Image.SCALE_DEFAULT));
+        ImageIcon icon = new ImageIcon(System.getProperty("user.dir") + "/resources/Beaver.jpg");
+        icon = new ImageIcon(icon.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT));
         String input = (String) JOptionPane.showInputDialog(f, "Enter the number of beaver furs to barter for the " + item.getName() + ":", "Input", JOptionPane.QUESTION_MESSAGE, icon, null, null);
         if (input != null) {
             try {
                 int price = Integer.parseInt(input);
                 Item rez = binarySearchName(item.getName());
 
-                System.out.println(rez);
                 if ((rez != null) && rez.getPrice() == price) {
-                    JOptionPane.showMessageDialog(null, "Successful trade! The trader was willing to sell the " + item.getName() + " for " + item.getPrice() + " furs.", "Trade Successful", JOptionPane.INFORMATION_MESSAGE, item.getImage());
+                    JOptionPane.showMessageDialog(null, "Successful trade! The trader was willing to sell the " + item.getName() + " for " + item.getPrice() + " furs.", "Trade Successful", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(item.getImage().getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT)));
                     items.remove(item);
                     return true;
                 } else if (rez.getPrice() < price) {
-                    JOptionPane.showMessageDialog(null, "This is clearly WORTH LESS than what you're offering! Are you trying to scam me? Go away!", "Trade Failed", JOptionPane.ERROR_MESSAGE, item.getImage());
+                    JOptionPane.showMessageDialog(null, "This is clearly WORTH LESS than what you're offering! Are you trying to scam me? Go away!", "Trade Failed", JOptionPane.ERROR_MESSAGE, new ImageIcon(item.getImage().getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT)));
                 } else if (rez.getPrice() > price) {
-                    JOptionPane.showMessageDialog(null, "How arrogant! This is clearly WORTH MORE than what you're offering! Are you trying to scam me? Go away!", "Trade Failed", JOptionPane.ERROR_MESSAGE, item.getImage());
+                    JOptionPane.showMessageDialog(null, "How arrogant! This is clearly WORTH MORE than what you're offering! Are you trying to scam me? Go away!", "Trade Failed", JOptionPane.ERROR_MESSAGE, new ImageIcon(item.getImage().getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT)));
                 } else {
                 }
             } catch (NumberFormatException e) {
@@ -87,21 +85,22 @@ public class BarteringTask extends Tasks {
         return false;
     }
 
+
     public String barteringMouseHandler(int x, int y) {
         if (sortAscButton.getLocation().x <= x && x <= sortAscButton.getLocation().x + 100 && sortAscButton.getLocation().y <= y && y <= sortAscButton.getLocation().y + 40) {
-            shellSortItemsByName(true);
+            shellSortItemsByName(false, items);
             return "Redraw";
         }
 
         if (sortDesButton.getLocation().x <= x && x <= sortDesButton.getLocation().x + 100 && sortDesButton.getLocation().y <= y && y <= sortDesButton.getLocation().y + 40) {
-            shellSortItemsByName(false);
+            shellSortItemsByName(true, items);
             return "Redraw";
         }
 
         for (Item item : items) { //for each item in the bartering task
             Point location = item.getLocation();
             if (x >= location.x - 100 && x <= location.x - 100 + width + 20 && y >= location.y && y <= location.y + height + 20) { //if the player is at the item
-                if (handleItemSelection(item)) { //if the gather score is 5
+                if (handleItemSelection(item)) {
                     inBarteringTask = false; //sets that the task has been completed
                     return "C4";
                 }
@@ -113,50 +112,51 @@ public class BarteringTask extends Tasks {
 
     public void startBarteringTask() {
         inBarteringTask = true;
-
-        loadItems();
-
     }
 
-    private void shellSortItemsByName(boolean ascending) {
-        int n = items.size();
+    private ArrayList<Item> shellSortItemsByName(boolean descending, ArrayList<Item> tempItems) {
+        int n = tempItems.size();
         for (int gap = n / 2; gap > 0; gap /= 2) {
             for (int i = gap; i < n; i++) {
-                Item temp = items.get(i);
+                Item temp = tempItems.get(i);
                 int j;
-                for (j = i; j >= gap && (ascending ?
-                        items.get(j - gap).getName().compareToIgnoreCase(temp.getName()) > 0 :
-                        items.get(j - gap).getName().compareToIgnoreCase(temp.getName()) < 0); j -= gap) {
+                for (j = i; j >= gap && (descending ? tempItems.get(j - gap).getName().compareToIgnoreCase(temp.getName()) > 0 : tempItems.get(j - gap).getName().compareToIgnoreCase(temp.getName()) < 0); j -= gap) {
 
-                    // Swap items and their locations
-                    Item tempItem = items.get(j);
-                    items.set(j, items.get(j - gap));
-                    items.set(j - gap, tempItem);
+                    Item tempItem = tempItems.get(j);
 
                     // Swap their locations
                     Point tempLocation = tempItem.getLocation();
-                    tempItem.setLocation(items.get(j).getLocation());
-                    items.get(j).setLocation(tempLocation);
-                }
-                items.set(j, temp);
+                    tempItem.setLocation(tempItems.get(j).getLocation());
+                    tempItems.get(j).setLocation(tempLocation);
 
+                    // Swap items and their locations
+                    tempItems.set(j, tempItems.get(j - gap));
+                    tempItems.set(j - gap, tempItem);
+
+
+                }
                 // Update location of the item being inserted
                 Point tempLocation = temp.getLocation();
-                temp.setLocation(items.get(j).getLocation());
-                items.get(j).setLocation(tempLocation);
+                temp.setLocation(tempItems.get(j).getLocation());
+                tempItems.get(j).setLocation(tempLocation);
+
+                tempItems.set(j, temp);
+
 
             }
         }
+        return tempItems;
     }
 
     private Item binarySearchName(String name) {
-        shellSortItemsByName(true);  // Ensure the list is sorted before binary search
+        ArrayList<Item> newItems = shellSortItemsByName(true, (ArrayList<Item>)items.clone());  // Ensure the list is sorted before binary search
+
         int low = 0;
-        int high = items.size() - 1;
+        int high = newItems.size() - 1;
 
         while (low <= high) {
             int mid = (low + high) / 2;
-            Item midItem = items.get(mid);
+            Item midItem = newItems.get(mid);
             int comparison = midItem.getName().compareToIgnoreCase(name);
 
             if (comparison == 0) {
@@ -168,35 +168,6 @@ public class BarteringTask extends Tasks {
             }
         }
         return null;
-    }
-
-    private void shellSortItemsByPrice(boolean ascending) {
-        int n = items.size();
-        for (int gap = n / 2; gap > 0; gap /= 2) {
-            for (int i = gap; i < n; i++) {
-                Item temp = items.get(i);
-                int j;
-                for (j = i; j >= gap && (ascending ? items.get(j - gap).getPrice() > temp.getPrice() : items.get(j - gap).getPrice() < temp.getPrice()); j -= gap) {
-
-                    // Swap items and their locations
-                    Item tempItem = items.get(j);
-                    items.set(j, items.get(j - gap));
-                    items.set(j - gap, tempItem);
-
-                    // Swap their locations
-                    Point tempLocation = tempItem.getLocation();
-                    tempItem.setLocation(items.get(j).getLocation());
-                    items.get(j).setLocation(tempLocation);
-                }
-                items.set(j, temp);
-
-                // Update location of the item being inserted
-                Point tempLocation = temp.getLocation();
-                temp.setLocation(items.get(j).getLocation());
-                items.get(j).setLocation(tempLocation);
-
-            }
-        }
     }
 }
     class Item {
