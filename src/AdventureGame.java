@@ -59,7 +59,7 @@ public class AdventureGame extends JFrame {
 
     public AdventureGame() {
         //opening screen
-        setTitle("Mato’s Fur Trade Journey");
+        setTitle("Mato’s Fur Trade Adventure!");
         setSize(windowWidth, windowHeight);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -288,7 +288,7 @@ public class AdventureGame extends JFrame {
             setPreferredSize(new Dimension(windowWidth, windowHeight));
             
             //label for the title of the game
-            JLabel introLabel = new JLabel("<html>Welcome to Mato’s<br>Fur Trade Journey!</br></html>", SwingConstants.CENTER);
+            JLabel introLabel = new JLabel("<html>Welcome to Mato’s<br>Fur Trade Adventure!</br></html>", SwingConstants.CENTER);
             introLabel.setSize(400, 100);
             introLabel.setLocation(200, 10);
             introLabel.setFont(new Font("Arial", Font.BOLD, 30));
