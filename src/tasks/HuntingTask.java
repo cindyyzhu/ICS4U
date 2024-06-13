@@ -24,7 +24,7 @@ public class HuntingTask extends Tasks{
     }
 
 
-    public void drawHuntingTask (Graphics g, int taskTimer, int PLAYER_SIZE, int TASK_TIME_LIMIT){
+    public void drawHuntingTask (Graphics g, int taskTimer, int player_size, int taskTimeLimit){
 
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, 200, 100);
@@ -32,22 +32,22 @@ public class HuntingTask extends Tasks{
         g.setColor(Color.BLACK);
         g.drawString("TASK: Hunt 5 beavers!", 10, 20);
         g.drawString("Score: " + huntScore, 10, 40);
-        g.drawString("Time remaining: " + (TASK_TIME_LIMIT - taskTimer) + " seconds", 10, 60);
+        g.drawString("Time remaining: " + (taskTimeLimit - taskTimer) + " seconds", 10, 60);
         g.setColor(Color.RED);
 
         for (Point animal : animals) {
             if (beaverIcon != null) {
-                g.drawImage(beaverIcon, animal.x, animal.y, PLAYER_SIZE+30, PLAYER_SIZE+30, null);
+                g.drawImage(beaverIcon, animal.x, animal.y, player_size+30, player_size+30, null);
             } else {
                 g.setColor(Color.GRAY);
-                g.fillRect(animal.x, animal.y, PLAYER_SIZE, PLAYER_SIZE);
+                g.fillRect(animal.x, animal.y, player_size, player_size);
             }
         }
     }
 
-    public String huntingMouseHandler (int x, int y, int PLAYER_SIZE) {
+    public String huntingMouseHandler (int x, int y, int player_size) {
         for (Point animal : animals) { //for each animal, point represents the location
-            if (x >= animal.x && x <= animal.x + PLAYER_SIZE +30 && y >= animal.y && y <= animal.y + PLAYER_SIZE +30) { //if the player is at the animal
+            if (x >= animal.x && x <= animal.x + player_size +30 && y >= animal.y && y <= animal.y + player_size +30) { //if the player is at the animal
                 huntScore++; //increase the hunt score
                 animals.remove(animal); //remove the animal
                 if (huntScore == 5) { //if the hunt score is 5
@@ -59,30 +59,30 @@ public class HuntingTask extends Tasks{
         }
         return "";
     }
-    public void startHuntingTask(int WINDOW_WIDTH, int WINDOW_HEIGHT) {
+    public void startHuntingTask(int windowWidth, int windowHeight) {
         inHuntingTask = true;
         huntScore = 0;
         animals.clear();
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
-            animals.add(new Point(random.nextInt(WINDOW_WIDTH - 50), random.nextInt(WINDOW_HEIGHT - 50)));
+            animals.add(new Point(random.nextInt(windowWidth - 50), random.nextInt(windowHeight - 50)));
         }
         JOptionPane.showMessageDialog(null, "Task: Hunt 5 beavers. Click on the moving beavers to hunt them.");
 
         animalMovementTimer = new Timer(400, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                moveAnimals(WINDOW_WIDTH, WINDOW_HEIGHT);
+                moveAnimals(windowWidth, windowHeight);
             }
         });
         animalMovementTimer.start();
     }
 
-    public void moveAnimals(int WINDOW_WIDTH, int WINDOW_HEIGHT) {
+    public void moveAnimals(int windowWidth, int windowHeight) {
         Random random = new Random();
         for (Point animal : animals) {
-            animal.x = Math.max(0, Math.min(animal.x + random.nextInt(41) - 10, WINDOW_WIDTH - 100));
-            animal.y = Math.max(0, Math.min(animal.y + random.nextInt(41) - 10, WINDOW_HEIGHT - 100));
+            animal.x = Math.max(0, Math.min(animal.x + random.nextInt(41) - 10, windowWidth - 100));
+            animal.y = Math.max(0, Math.min(animal.y + random.nextInt(41) - 10, windowHeight - 100));
         }
     }
 }

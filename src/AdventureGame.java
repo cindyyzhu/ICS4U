@@ -11,45 +11,56 @@ import tasks.HuntingTask;
 import tasks.BarteringTask;
 
 public class AdventureGame extends JFrame {
-    //initializes the tasks and constructors for the Adventure Game
+    //initializes the tasks and constructors for the AdventureGame class for the game
+    
+    //identify the different tasks
     MusicTask musicTask = new MusicTask();
     GatheringTask gatheringTask = new GatheringTask();
     HuntingTask huntingTask = new HuntingTask();
     BarteringTask barteringTask = new BarteringTask();
     public boolean inTask = false;
-    private static final int WINDOW_WIDTH = 800;
-    private static final int WINDOW_HEIGHT = 600;
-    private static final int PLAYER_SIZE = 20;
+    
+    //initialize the window size, player size, and images
+    private static final int windowWidth = 800;
+    private static final int windowHeight = 600;
+    private static final int playerSize = 20;
+    
+    //initializing the images
     private Image playerImage;
-    private Image endSceneImage;
+
+    //initializing the different points
     private int playerX = 50;
     private int playerY = 50;
     private int failureCount = 0;
     private boolean isDialogue = false;
     private boolean showMainScene = true;
     private boolean showTaskScene = false;
-    private boolean endScene = false;
-    private static final int MAX_FAILURES = 3;
+    private static final int maxFails = 3;
+    
+    //current choicepoints
     private String currentCheckpoint = "C1";
-    private List<ChoicePoint> choicePoints = new ArrayList<>();
-    private List<String> completedCheckpoints = new ArrayList<>();
+    private final List<ChoicePoint> choicePoints = new ArrayList<>();
+    private final List<String> completedCheckpoints = new ArrayList<>();
+    
+    //time limit for the hunting and gathering tasks
+    public static final int taskTimeLimit = 1000000000;
     public Timer taskTimerTimer;
-    public static final int TASK_TIME_LIMIT = 1000000;
-
     public Timer animationTimer;
     public int taskTimer = 0;
 
-    private IntroductionPanel introductionPanel;
-    private InstructionPanel instructionPanel;
-    private GamePanel gamePanel;
-    private EndScenePanel endScenePanel;
+    //for the different panels (screens/scenes in the game)
+    private final IntroductionPanel introductionPanel;
+    private final InstructionPanel instructionPanel;
+    private final GamePanel gamePanel;
+    private final EndScenePanel endScenePanel;
+    private final FailedEndScenePanel failedEndScenePanel;
 
-    private JLabel msgLabel;
+    private final JLabel msgLabel;
 
     public AdventureGame() {
         //opening screen
         setTitle("Mato’s Fur Trade Journey");
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        setSize(windowWidth, windowHeight);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -67,8 +78,9 @@ public class AdventureGame extends JFrame {
 
         addKeyListener(new KeyHandler());
         addMouseListener(new MouseHandler());
-        setFocusable(true); // Set the JFrame to focusable so it can receive key events
-
+        setFocusable(true); //allow it to receive key events
+        
+        //initialize the different panels
         introductionPanel = new IntroductionPanel(this);
         add(introductionPanel);
 
@@ -83,24 +95,27 @@ public class AdventureGame extends JFrame {
         endScenePanel = new EndScenePanel(this);
         endScenePanel.setVisible(false);
         endScenePanel.setEnabled(false);
-
+        
+        failedEndScenePanel = new FailedEndScenePanel(this);
+        failedEndScenePanel.setVisible(false);
+        failedEndScenePanel.setEnabled(false);
+        
+        //different choicepoints and positions of each checkpoint
         choicePoints.add(new ChoicePoint(200, 100, "C1", "Elder"));
         choicePoints.add(new ChoicePoint(300, 200, "C2", "Uncle"));
         choicePoints.add(new ChoicePoint(400, 300, "C3", "Father"));
         choicePoints.add(new ChoicePoint(500, 400, "C4", "Trade Post"));
 
-        // Main game timer to handle task timeouts
+        // timer for the hunting and gathering tasks
         taskTimerTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (inTask) {
                     taskTimer++;
-                    if (taskTimer > TASK_TIME_LIMIT) {
+                    if (taskTimer > taskTimeLimit) {
                         inTask = false;
-                        musicTask.inMusicTask = false;
                         gatheringTask.inGatheringTask = false;
                         huntingTask.inHuntingTask = false;
-                        barteringTask.inBarteringTask = false;
                         failureCount++;
                         JOptionPane.showMessageDialog(null, "Time's up! You failed the task. Try again.");
                         showMainScene = true;
@@ -121,39 +136,38 @@ public class AdventureGame extends JFrame {
         });
         animationTimer.start();
 
-        //showStartScreen();
-    }
-
-    private void showStartScreen() {
-        JOptionPane.showMessageDialog(null, "Welcome to Mato’s Fur Trade Journey\nClick 'OK' to get started!");
-        showInstructionsScreen();
-    }
-
-    private void showInstructionsScreen() {
-        JOptionPane.showMessageDialog(null, "Mato, who is a young, up and coming fur trader, following in the footsteps of his father in Anishinaabeg tribes, like many boys of his age, must first pass a number of steps before he becomes officially recognized.\nHelp Mato pass each checkpoint and become an official fur trader!\n\nUse arrow keys to move Mato to each checkpoint.");
     }
 
     private void showDialogue(String checkpoint) {
         isDialogue = true;
+        Image dialogueText;
+        String checkPointImage = "";
+
+        dialogueText = new ImageIcon(System.getProperty("user.dir") + "/resources/" + checkPointImage + ".png").getImage();
 
         String message = "";
+
         switch (checkpoint) {
             case "C1":
-                message = "Elder: Hello Mato, so I hear you’ve been wanting to become a fur trader like your father… But before you can do that, you must first learn the history behind the fur trade in our community. To learn more about this, why don’t you play some traditional Anishinaabeg music on our flutes?";
+                checkPointImage = "C1";
+               // message = "Elder: Hello Mato, so I hear you’ve been wanting to become a fur trader like your father… But before you can do that, you must first learn the history behind the fur trade in our community. To learn more about this, why don’t you play some traditional Anishinaabeg music on our flutes?";
                 break;
             case "C2":
-                message = "Uncle: Hello Mato, so you’ve wanted to learn how to make a bow? Well, oh ho ho, before you can do that, you must collect the materials to make a bow!";
+                checkPointImage = "C2";
+              //  message = "Uncle: Hello Mato, so you’ve wanted to learn how to make a bow? Well, oh ho ho, before you can do that, you must collect the materials to make a bow!";
                 break;
             case "C3":
-                message = "Father: Hello Mato, ready to hunt? Let’s go!";
+                checkPointImage = "C3";
+               // message = "Father: Hello Mato, ready to hunt? Let’s go!";
                 break;
             case "C4":
-                message = "Bartering Staff: Oh look, there’s a new face! But, first let’s make your first trade!";
+                checkPointImage = "C4";
+              //  message = "Bartering Staff: Oh look, there’s a new face! But, first let’s make your first trade!";
                 break;
         }
         // JOptionPane.showMessageDialog(null, message);
-        msgLabel.setText(message);
-        msgLabel.setVisible(true);
+       // msgLabel.setText(message);
+        //msgLabel.setVisible(true);
         startTask(checkpoint);
 
     }
@@ -172,7 +186,7 @@ public class AdventureGame extends JFrame {
                 gatheringTask.startGatheringTask();
                 break;
             case "C3":
-                huntingTask.startHuntingTask(WINDOW_WIDTH, WINDOW_HEIGHT);
+                huntingTask.startHuntingTask(windowWidth, windowHeight);
                 break;
             case "C4":
                 barteringTask.startBarteringTask();
@@ -181,7 +195,8 @@ public class AdventureGame extends JFrame {
         }
         repaint();
     }
-
+    
+    //method to complete the task
     private void completeTask(String checkpoint) {
         msgLabel.setVisible(false);
         inTask = false;
@@ -199,18 +214,18 @@ public class AdventureGame extends JFrame {
         checkEndGame(AdventureGame.this);
     }
 
+    //resets the game if the user wants to play again
     private void resetGame(AdventureGame game) {
         playerX = 50;
         playerY = 50;
         failureCount = 0;
-        musicTask.resetTasks();//add the other methods
+        musicTask.resetTasks();
         barteringTask.resetTasks();
         gatheringTask.resetTasks();
         huntingTask.resetTasks();
         isDialogue = false;
         showMainScene = true;
         showTaskScene = false;
-        endScene = false;
         currentCheckpoint = "C1";
         completedCheckpoints.clear();
         taskTimer = 0;
@@ -225,6 +240,7 @@ public class AdventureGame extends JFrame {
         introductionPanel.setEnabled(true);
     }
 
+    //draws the main scene with all the different checkpoints
     private void drawMainScene(Graphics g) {
         for (ChoicePoint choicePoint : choicePoints) {
             if (!completedCheckpoints.contains(choicePoint.checkpoint)) {
@@ -232,35 +248,39 @@ public class AdventureGame extends JFrame {
             }
         }
 
+        //draws the player image
         if (playerImage != null) {
-            g.drawImage(playerImage, playerX, playerY, PLAYER_SIZE + 30, PLAYER_SIZE + 40, this);
+            g.drawImage(playerImage, playerX, playerY, playerSize + 30, playerSize + 40, this);
         } else {
 
-            g.setColor(Color.BLUE);
-            g.fillRect(playerX, playerY, PLAYER_SIZE, PLAYER_SIZE);
+            g.setColor(Color.BLUE); //a blue icon will show up if the player image doesn't work
+            g.fillRect(playerX, playerY, playerSize, playerSize);
         }
     }
 
+    //draws the task scene for each
     private void drawTaskScene(Graphics g) {
         if (musicTask.inMusicTask) {
             musicTask.drawMusicTask(g);
         } else if (gatheringTask.inGatheringTask) {
-            gatheringTask.drawGatheringTask(g, taskTimer, PLAYER_SIZE, TASK_TIME_LIMIT);
+            gatheringTask.drawGatheringTask(g, taskTimer, playerSize, taskTimeLimit);
         } else if (huntingTask.inHuntingTask) {
-            huntingTask.drawHuntingTask(g, taskTimer, PLAYER_SIZE, TASK_TIME_LIMIT);
+            huntingTask.drawHuntingTask(g, taskTimer, playerSize, taskTimeLimit);
         } else if (barteringTask.inBarteringTask) {
-            barteringTask.drawBarteringTask(g, taskTimer, TASK_TIME_LIMIT);
+            barteringTask.drawBarteringTask(g);
         }
         g.drawString("Failures: " + failureCount, 10, 80);
     }
 
+    //introductory panel scene
     private class IntroductionPanel extends JPanel {
         private Image backgroundImage;
 
         public IntroductionPanel(AdventureGame game) {
             setLayout(null);
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-
+            setPreferredSize(new Dimension(windowWidth, windowHeight));
+            
+            //label for the title of the game
             JLabel introLabel = new JLabel("<html>Welcome to Mato’s<br>Fur Trade Journey!</br></html>", SwingConstants.CENTER);
             introLabel.setSize(400, 100);
             introLabel.setLocation(200, 10);
@@ -278,10 +298,11 @@ public class AdventureGame extends JFrame {
             add(startButton);
 
 
+            //for if the button is clicked
             startButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    introductionPanel.setVisible(false);
+                    introductionPanel.setVisible(false); //goes to the instruction panel, and hides this one
                     introductionPanel.setEnabled(false);
                     game.add(instructionPanel);
                     instructionPanel.setVisible(true);
@@ -290,7 +311,7 @@ public class AdventureGame extends JFrame {
                 }
             });
 
-            try {
+            try { //image for the background
                 backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
 
             } catch (Exception e) {
@@ -301,20 +322,21 @@ public class AdventureGame extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+            if (backgroundImage != null) { //draws the background
+                g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
             }
 
         }
     }
 
+    //instruction panel to give users the instructions
     private class InstructionPanel extends JPanel {
         private Image backgroundImage;
-        private Image instructionText;
+        private Image instructionText; //the text for the instruction panel
 
         public InstructionPanel(AdventureGame game) {
             setLayout(null);
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+            setPreferredSize(new Dimension(windowWidth, windowHeight));
 
             //button to go to the next screen
             JButton startButton = new JButton("Got It!");
@@ -324,12 +346,12 @@ public class AdventureGame extends JFrame {
             startButton.setForeground(Color.BLACK);
             startButton.setBackground(Color.WHITE);
             add(startButton);
-
-
+            
+            //for if the button is clicked
             startButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    instructionPanel.setVisible(false);
+                    instructionPanel.setVisible(false); //goes to the game panel, and hides this one
                     instructionPanel.setEnabled(false);
                     game.add(gamePanel);
                     gamePanel.setVisible(true);
@@ -338,7 +360,7 @@ public class AdventureGame extends JFrame {
                 }
             });
 
-            try {
+            try { //shows the background and text
                 backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
                 instructionText = new ImageIcon(System.getProperty("user.dir") + "/resources/Instruction-text.png").getImage();
 
@@ -350,14 +372,15 @@ public class AdventureGame extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
-                g.drawImage(instructionText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            if (backgroundImage != null && instructionText != null) { //draws the background and text
+                g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
+                g.drawImage(instructionText, windowWidth / 2 - 300, windowHeight / 2 - 225, 600, 350, null);
             }
 
         }
     }
 
+    //shows the game panel with the different checkpoints and the different tasks
     private class GamePanel extends JPanel {
         private Image backgroundImage;
 
@@ -372,103 +395,79 @@ public class AdventureGame extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-           /* if (endScene) {
-                gamePanel.setVisible(false);
-                gamePanel.setEnabled(false);
-                game.add(endScenePanel);
-                endScenePanel.setVisible(true);
-                endScenePanel.setEnabled(true);
-            }*/
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+                g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
             }
-
-            if (showMainScene) {
+            
+            //draws the different scenes depending on what is currently in progress
+            if (showMainScene) { 
                 drawMainScene(g);
             } else if (showTaskScene) {
                 drawTaskScene(g);
             }
-            /*else if (endScene) {
-                drawEndScene(AdventureGame.this);
-            }*/
         }
     }
 
-    private void checkEndGame(AdventureGame game) {
-        if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") &&
-                completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
-            endScene = true;
-            endScenePanel.setVisible(true);
-            endScenePanel.setEnabled(true);
-            game.add(endScenePanel);
-            //endScenePanel.repaint();
-            //endScenePanel.revalidate();
-            gamePanel.setVisible(false);
-            gamePanel.setEnabled(false);
+    //method to check whether the user has completed all the checkpoints or not
+    private void checkEndGame(AdventureGame game) { //if completed all the checkpoints
+        if (completedCheckpoints.contains("C1") && completedCheckpoints.contains("C2") && completedCheckpoints.contains("C3") && completedCheckpoints.contains("C4")) {
             taskTimerTimer.stop();
             animationTimer.stop();
-
-
-            /*try {
-                endSceneImage = new ImageIcon(System.getProperty("user.dir") + "/resources/EndScene.jpeg").getImage();
-            } catch (Exception e) {
-                e.printStackTrace();
+            
+            if (failureCount > maxFails) {
+                failedEndScenePanel.setVisible(true);
+                failedEndScenePanel.setEnabled(true);
+                game.add(failedEndScenePanel);
+                gamePanel.setVisible(false);
+                gamePanel.setEnabled(false);
+            } else{
+                //shows the end scene panel and hides the game panel
+                endScenePanel.setVisible(true);
+                endScenePanel.setEnabled(true);
+                game.add(endScenePanel);
+                gamePanel.setVisible(false);
+                gamePanel.setEnabled(false);
             }
-            showMainScene = false;
-            showTaskScene = false;
-            if (failureCount > MAX_FAILURES) {
-                JOptionPane.showMessageDialog(null, "Elder: Mato, I’m very disappointed in your clumsy skills.\nClearly, you are not suited for the fur trade, as you've already failed " + failureCount + " times.");
-                int response = JOptionPane.showConfirmDialog(null, "System: Would you like to restart to try again to become a fur trader?", "Restart", JOptionPane.YES_NO_OPTION);
-                if (response == JOptionPane.YES_OPTION) {
-                    resetGame();
-                } else {
-                    System.exit(0);
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Elder: Congratulations, Mato! I knew you’d succeed!");
-                JOptionPane.showMessageDialog(null, "Congratulations! Mato has become a full-fledged fur trader!");
-                System.exit(0);
-            }*/
         }
     }
 
-   /* private class failedEndScenePanel extends JPanel {
+   private class FailedEndScenePanel extends JPanel {
         private Image backgroundImage;
+        private Image failedEndSceneText;
         public FailedEndScenePanel (AdventureGame game) {
             setLayout(null);
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+            setPreferredSize(new Dimension(windowWidth, windowHeight));
 
-            //button to go to the next screen
-            JButton startButton = new JButton("Play!");
-            startButton.setSize(100, 50);
-            startButton.setLocation(350, 450);
-            startButton.setFont(new Font("Arial", Font.BOLD, 20));
-            startButton.setForeground(Color.BLACK);
-            startButton.setBackground(Color.WHITE);
-            add(startButton);
+            //button to try again
+            JButton tryAgainButton = new JButton("Try again...");
+            tryAgainButton.setSize(150, 50);
+            tryAgainButton.setLocation(350, 450);
+            tryAgainButton.setFont(new Font("Arial", Font.BOLD, 20));
+            tryAgainButton.setForeground(Color.BLACK);
+            tryAgainButton.setBackground(Color.WHITE);
+            add(tryAgainButton);
 
 
-            startButton.addActionListener(new ActionListener() {
+            //if the try again button is clicked
+            tryAgainButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    instructionPanel.setVisible(false);
-                    instructionPanel.setEnabled(false);
-                    game.add(gamePanel);
-                    gamePanel.setVisible(true);
-                    gamePanel.setEnabled(true);
-
+                    //play the game again
+                    resetGame(AdventureGame.this);
+                    game.add(introductionPanel);
+                    failedEndScenePanel.setVisible(false);
+                    failedEndScenePanel.setEnabled(false);
                 }
             });
 
             try {
                 backgroundImage = new ImageIcon(System.getProperty("user.dir") + "/resources/Village-Intro.png").getImage();
-                failedEndSceneText = new ImageIcon(System.getProperty("user.dir") + "/resources/Instruction-text.png").getImage();
+                failedEndSceneText = new ImageIcon(System.getProperty("user.dir") + "/resources/failedEndSceneText.png").getImage();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -478,30 +477,23 @@ public class AdventureGame extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
-                g.drawImage(failedEndSceneText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            if (backgroundImage != null && failedEndSceneText != null) {
+                g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
+                g.drawImage(failedEndSceneText, windowWidth / 2 - 300, windowHeight / 2 - 225, 600, 350, null);
             }
 
         }
         }
-    }*/
 
-    /*private void drawEndScene(AdventureGame game) {
-        gamePanel.setVisible(false);
-        gamePanel.setEnabled(false);
-        game.add(endScenePanel);
-        endScenePanel.setVisible(true);
-        endScenePanel.setEnabled(true);
-    }*/
 
+    //successful endScenePanel for if the user manages to complete all the checkpoints in less than 3 fails
     private class EndScenePanel extends JPanel {
         private Image backgroundImage;
         private Image endScenePanelText;
 
         public EndScenePanel(AdventureGame game) {
             setLayout(null);
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+            setPreferredSize(new Dimension(windowWidth, windowHeight));
 
             //button to exit the game
             JButton exitButton = new JButton("Exit Game");
@@ -521,6 +513,7 @@ public class AdventureGame extends JFrame {
             playAgainButton.setBackground(Color.WHITE);
             add(playAgainButton);
 
+            //if exit button is pressed
             exitButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -529,6 +522,7 @@ public class AdventureGame extends JFrame {
                 }
             });
 
+            //if play again button is pressed
             playAgainButton.addActionListener (new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -549,73 +543,77 @@ public class AdventureGame extends JFrame {
             }
         }
 
+        //draws the background image and text
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
-                g.drawImage(endScenePanelText, WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 225, 600, 350, null);
+            if (backgroundImage != null && endScenePanelText != null) {
+                g.drawImage(backgroundImage, 0, 0, windowWidth, windowHeight, null);
+                g.drawImage(endScenePanelText, windowWidth / 2 - 300, windowHeight / 2 - 225, 600, 350, null);
             }
 
         }
 
         }
-
-
-
+        
+        //key handler to allow the user to use arrow keys to move around
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            //msgLabel.setVisible(false);
-
+            
+            //allows the music task to take input from keyboard to play the notes
             String returnMusicTask = musicTask.handleMusicTask(e.getKeyChar());
-            if (!returnMusicTask.isEmpty()) {
+            if (!returnMusicTask.isEmpty()) { //depending on what the music task returns, will mark the task as complete
                 completeTask(returnMusicTask);
+            }
+            else{
+                failureCount++;
             }
             repaint();
 
-            if (inTask || isDialogue) {
+            if (inTask || isDialogue) { //if the user is in a task or dialogue, they can't move using arrow keys
                 return;
             }
 
+            //allows the player to move around using the arrow keys
             int keyCode = e.getKeyCode();
-            switch (keyCode) {
-                case KeyEvent.VK_LEFT:
+            switch (keyCode) { //depending on what arrow key is pressed, the user will be able to move around
+                case KeyEvent.VK_LEFT: 
                     playerX = Math.max(playerX - 10, 0);
                     break;
                 case KeyEvent.VK_RIGHT:
-                    playerX = Math.min(playerX + 10, WINDOW_WIDTH - PLAYER_SIZE);
+                    playerX = Math.min(playerX + 10, windowWidth - playerSize);
                     break;
                 case KeyEvent.VK_UP:
                     playerY = Math.max(playerY - 10, 0);
                     break;
                 case KeyEvent.VK_DOWN:
-                    playerY = Math.min(playerY + 10, WINDOW_HEIGHT - PLAYER_SIZE);
+                    playerY = Math.min(playerY + 10, windowHeight - playerSize);
                     break;
             }
 
+            //checks if the player is at a checkpoint
             for (ChoicePoint choicePoint : choicePoints) {
-                if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(playerX, playerY)) {
-                    currentCheckpoint = choicePoint.checkpoint;
+                if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(playerX, playerY)) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
+                    currentCheckpoint = choicePoint.checkpoint; //sets the current checkpoint to the checkpoint the player is at
                     if (!inTask) {
-                    showDialogue(currentCheckpoint); }
+                    showDialogue(currentCheckpoint); } //shows the dialogue for the checkpoint
                     break;
                 }
             }
 
-            repaint();
+            repaint(); //resets the screen
         }
     }
 
+    //mouse handler to take user mouse input
     private class MouseHandler extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent event) {  //this checks if the player is at a checkpoint
             int x = event.getX() - getInsets().left; //this will get the x and y coordinates of the mouse click and subtract the insets (the border) from the x and y coordinates
             int y = event.getY() - getInsets().top;
-
-            //msgLabel.setVisible(false);
-
-            if (!inTask){
+            
+            if (!inTask){ //if the user is not in a task, so the dialogue won't pop up during the task
             //for checkpoints to determine whether the player is at a checkpoint
             for (ChoicePoint choicePoint : choicePoints) {
                 if (!completedCheckpoints.contains(choicePoint.checkpoint) && choicePoint.contains(x, y)) { //if the player is at a checkpoint and the checkpoint is available (not yet completed)
@@ -627,42 +625,39 @@ public class AdventureGame extends JFrame {
             }}
 
             if (gatheringTask.inGatheringTask) { //if the player is in the gathering task
-                String returnGatheringTask = gatheringTask.gatheringMouseHandler(x, y, PLAYER_SIZE); //call the gathering mouse handler
-                if (!returnGatheringTask.isEmpty()) {
+                String returnGatheringTask = gatheringTask.gatheringMouseHandler(x, y, playerSize); //call the gathering mouse handler
+                if (!returnGatheringTask.isEmpty()) { //if the user has completed the task
                     completeTask(returnGatheringTask);
                 }
 
             }
             if (huntingTask.inHuntingTask) { //if the player is in the hunting task
-                String returnHuntingTask = huntingTask.huntingMouseHandler(x, y, PLAYER_SIZE); //call the hunting mouse handler
-                if (!returnHuntingTask.isEmpty()) {
+                String returnHuntingTask = huntingTask.huntingMouseHandler(x, y, playerSize); //call the hunting mouse handler
+                if (!returnHuntingTask.isEmpty()) { //if the user has completed the task
                     completeTask(returnHuntingTask);
 
                 }
             }
 
             if (barteringTask.inBarteringTask) { //if the player is in the bartering task
-                String returnBarteringTask = barteringTask.barteringMouseHandler(x, y, PLAYER_SIZE); //call the bartering mouse handler
-                if (returnBarteringTask == "C4") {
+                String returnBarteringTask = barteringTask.barteringMouseHandler(x, y); //call the bartering mouse handler
+                if (returnBarteringTask == "C4") { //if the user has completed the task
                     completeTask(returnBarteringTask);
-                } else if (returnBarteringTask == "Redraw") {
-                    barteringTask.drawBarteringTask(getGraphics(), taskTimer, TASK_TIME_LIMIT);
+                } else if (returnBarteringTask == "Redraw") { //if it needs to be redrawn
+                    barteringTask.drawBarteringTask(getGraphics());
                 }
                 else  {
-
-                    /*failureCount++;
-                    inTask = false;
-                    barteringTask.inBarteringTask = false;
-                    showMainScene = true;*/
+                    failureCount++;
                 }
             }
             repaint(); //reset the screen
         }
     }
 
+    //choicepoint class to create the different checkpoints
     private class ChoicePoint {
-        int x, y;
-        String checkpoint;
+        int x, y; //x and y position of each choicepoint
+        String checkpoint; 
         String description;
         private Image image;
 
@@ -674,7 +669,7 @@ public class AdventureGame extends JFrame {
             loadImage();
         }
 
-        private void loadImage () {
+        private void loadImage () { //images of each different checkpoint
             try{
                 switch(checkpoint) {
                     case "C1":
@@ -702,10 +697,10 @@ public class AdventureGame extends JFrame {
                 e.printStackTrace();
             }
         }
-
-
+        
+        //draw the different choicepoints with their text description
         public void draw(Graphics g) {
-            FontMetrics metrics = g.getFontMetrics(g.getFont());
+            FontMetrics metrics = g.getFontMetrics(g.getFont()); //get the font metrics
             int textWidth = metrics.stringWidth(description);
             int textHeight = metrics.getHeight();
 
@@ -715,12 +710,13 @@ public class AdventureGame extends JFrame {
             int textX = x + (imageWidth - textWidth) / 2;
             int textY = y + imageHeight + textHeight;
 
-            g.setColor(Color.WHITE);
+            g.setColor(Color.WHITE); //to highlight the text
             g.fillRect(textX-10, textY-textHeight+2, textWidth + 20, textHeight+1);
 
-            g.setColor(Color.BLACK);
+            g.setColor(Color.BLACK); //text
             g.drawString(description, textX, textY);
 
+            //to show the image of each different checkpoint
             if (image != null) {
                 switch (checkpoint)
                 {
@@ -742,21 +738,23 @@ public class AdventureGame extends JFrame {
                 } }else {
             }}
 
-        public boolean contains(int px, int py) {
-            // Check if the click is within the image bounds
-            if (px >= x && px <= x + 50 && py >= y && py <= y + 50) {
+        //allows the user to enter the checkpoint if they go onto the image or the text
+        public boolean contains(int clickX, int clickY) {
+            // check if the click is within the image bounds
+            if (clickX >= x && clickX <= x + 50 && clickY >= y && clickY <= y + 50) {
                 return true;
             }
             // Check if the click is within the text bounds
             FontMetrics metrics = getGraphics().getFontMetrics();
             int textWidth = metrics.stringWidth(description);
-            if (px >= x - 10 && px <= x - 10 + textWidth + 20 && py >= y - 30 && py <= y - 30 + metrics.getHeight()) {
+            if (clickX >= x - 10 && clickX <= x - 10 + textWidth + 20 && clickY >= y - 30 && clickY <= y - 30 + metrics.getHeight()) {
                 return true;
             }
             return false;
         }}
 
 
+    //main method to run the game
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             AdventureGame game = new AdventureGame();
