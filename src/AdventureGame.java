@@ -34,7 +34,7 @@ public class AdventureGame extends JFrame {
     private List<ChoicePoint> choicePoints = new ArrayList<>();
     private List<String> completedCheckpoints = new ArrayList<>();
     public Timer taskTimerTimer;
-    public static final int TASK_TIME_LIMIT = 10;
+    public static final int TASK_TIME_LIMIT = 1000000;
 
     public Timer animationTimer;
     public int taskTimer = 0;
@@ -175,15 +175,7 @@ public class AdventureGame extends JFrame {
                 huntingTask.startHuntingTask(WINDOW_WIDTH, WINDOW_HEIGHT);
                 break;
             case "C4":
-                String returnBarteringTask = barteringTask.startBarteringTask();
-                if (!returnBarteringTask.isEmpty()) {
-                    completeTask(returnBarteringTask);
-                } else {
-                    failureCount++;
-                    inTask = false;
-                    barteringTask.inBarteringTask = false;
-                    showMainScene = true;
-                }
+                barteringTask.startBarteringTask();
 
                 break;
         }
@@ -212,6 +204,9 @@ public class AdventureGame extends JFrame {
         playerY = 50;
         failureCount = 0;
         musicTask.resetTasks();//add the other methods
+        barteringTask.resetTasks();
+        gatheringTask.resetTasks();
+        huntingTask.resetTasks();
         isDialogue = false;
         showMainScene = true;
         showTaskScene = false;
@@ -643,6 +638,22 @@ public class AdventureGame extends JFrame {
                 if (!returnHuntingTask.isEmpty()) {
                     completeTask(returnHuntingTask);
 
+                }
+            }
+
+            if (barteringTask.inBarteringTask) { //if the player is in the bartering task
+                String returnBarteringTask = barteringTask.barteringMouseHandler(x, y, PLAYER_SIZE); //call the bartering mouse handler
+                if (returnBarteringTask == "C4") {
+                    completeTask(returnBarteringTask);
+                } else if (returnBarteringTask == "Redraw") {
+                    barteringTask.drawBarteringTask(getGraphics(), taskTimer, TASK_TIME_LIMIT);
+                }
+                else  {
+
+                    /*failureCount++;
+                    inTask = false;
+                    barteringTask.inBarteringTask = false;
+                    showMainScene = true;*/
                 }
             }
             repaint(); //reset the screen

@@ -7,17 +7,14 @@ import java.util.*;
 public class GatheringTask extends Tasks {
     public HashMap <Image, Point> materialMap = new HashMap <> ();
 
-   public GatheringTask() {
-        try { materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/wood.png").getImage(), new Point(200, 400));
-            materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sinew.png").getImage(), new Point(300, 200));
-            materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sealskin.png").getImage(), new Point(400, 300));
-            materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/copper.png").getImage(), new Point(500, 400));
-            materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/bone.png").getImage(), new Point(600, 200));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }}
-
+    private void initializeMaterialMap () {
+        materialMap.clear();
+        materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/wood.png").getImage(), new Point(200, 400));
+        materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sinew.png").getImage(), new Point(300, 200));
+        materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/sealskin.png").getImage(), new Point(400, 300));
+        materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/copper.png").getImage(), new Point(500, 400));
+        materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/bone.png").getImage(), new Point(600, 200));
+    }
     public void drawGatheringTask (Graphics g, int taskTimer, int PLAYER_SIZE, int TASK_TIME_LIMIT){
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, 250, 100); //white rectangle to see the black text on the background
@@ -35,6 +32,7 @@ public class GatheringTask extends Tasks {
     public void startGatheringTask () {
         inGatheringTask = true;
         gatherScore = 0;
+        initializeMaterialMap();
 
         JOptionPane.showMessageDialog(null, "Task: Collect 1 of each of the following - wood, braided sinew, sealskin, copper rivets, and animal bone. Click on the materials to collect them.");
     }

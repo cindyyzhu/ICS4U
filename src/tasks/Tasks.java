@@ -18,9 +18,7 @@ public class Tasks {
         inHuntingTask = false;
         inBarteringTask = false;
         gatherScore = 0;
-        musicScore = 0;
         huntScore = 0;
-        barterScore = 0;
     }
 
 }

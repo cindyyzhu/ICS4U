@@ -10,22 +10,27 @@ public class MusicTask extends Tasks {
     private final String[] notes = {"a", "b", "c", "d", "e", "f", "g"};
     private final char[] noteKeys = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
 
+    private Image musicNotes;
+
+    public MusicTask() {
+        try {
+            musicNotes = new ImageIcon(System.getProperty("user.dir") + "/resources/MusicalNotes.png").getImage();
+        } catch (Exception e) {
+
+        }
+    }
+
     public void drawMusicTask(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, 250, 100);
         g.setColor(Color.BLACK);
         g.drawString("Play the notes in order: a, b, c, d, e, f, g", 10, 20);
         g.setColor (Color.WHITE);
-        g.fillRect(80, 230, 600, 100);
-        for (int i = 0; i < notes.length; i++) {
-            if (i == noteIndex) {
-                g.setColor(Color.RED); // Highlight the current note
-            } else {
-                g.setColor(Color.BLACK);
-            }
-            g.drawString(notes[i], 140 + i * 80, 275);
-            g.drawOval(120 + i * 80, 250, 50, 50);
+
+        if (musicNotes != null) {
+            g.drawImage(musicNotes, 800 / 2 - 300, 600/ 2 - 170, 600, 350, null);
         }
+        g.drawOval(233 + noteIndex * 69, 415, 50, 50);
     }
 
     public void startMusicTask() {
