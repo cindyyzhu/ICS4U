@@ -7,6 +7,7 @@ import java.util.*;
 public class GatheringTask extends Tasks {
     public HashMap <Image, Point> materialMap = new HashMap <> ();
 
+    //hashmap to store the materials and their locations
     private void initializeMaterialMap () {
         materialMap.clear();
         materialMap.put(new ImageIcon(System.getProperty("user.dir") + "/resources/wood.png").getImage(), new Point(200, 400));
@@ -25,16 +26,14 @@ public class GatheringTask extends Tasks {
         g.drawString("Time remaining: " + (taskTimeLimit - taskTimer) + " seconds", 10, 60);
         g.setColor(Color.RED);
 
-        for (Image material : materialMap.keySet()) {
+        for (Image material : materialMap.keySet()) { //for each material, it will draw it
             Point location = materialMap.get(material);
             g.drawImage(material, location.x, location.y, playerSize + 30, playerSize + 30, null);
         }}
-    public void startGatheringTask () {
+    public void startGatheringTask () { //starts the gathering task
         inGatheringTask = true;
         gatherScore = 0;
         initializeMaterialMap();
-
-        JOptionPane.showMessageDialog(null, "Task: Collect 1 of each of the following - wood, braided sinew, sealskin, copper rivets, and animal bone. Click on the materials to collect them.");
     }
 
     public String gatheringMouseHandler (int x, int y, int playerSize) {
@@ -50,7 +49,7 @@ public class GatheringTask extends Tasks {
                 break;
             }
         }
-        return "";
+        return ""; //task not complete
     }
     }
 

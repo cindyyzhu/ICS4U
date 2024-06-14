@@ -6,6 +6,7 @@ import javax.sound.sampled.*;
 import java.io.File;
 
 public class MusicTask extends Tasks {
+    //intializing constructor values
     private int noteIndex = 0;
     private final String[] notes = {"a", "b", "c", "d", "e", "f", "g"};
     private final char[] noteKeys = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
@@ -13,7 +14,7 @@ public class MusicTask extends Tasks {
     private Image musicNotes;
 
     public MusicTask() {
-        try {
+        try { //initialize the music notes background picture
             musicNotes = new ImageIcon(System.getProperty("user.dir") + "/resources/MusicalNotes.png").getImage();
 
         } catch (Exception e) {
@@ -21,40 +22,42 @@ public class MusicTask extends Tasks {
         }
     }
 
-    public void drawMusicTask(Graphics g) {
+    public void drawMusicTask(Graphics g) { //text on screen
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 250, 100);
-        g.setColor(Color.BLACK);
-        g.drawString("Play the notes in order: a, b, c, d, e, f, g", 10, 20);
-        g.setColor (Color.RED);
+        g.fillRect(0, 0, 280, 100); //highlighting the text
 
-        if (musicNotes != null) {
+        g.setColor(Color.BLACK);
+        g.drawString("TASK: Play the notes in order: a, b, c, d, e, f, g", 10, 20);
+
+        if (musicNotes != null) { //draws the image background
             g.drawImage(musicNotes, 800 / 2 - 300, 600/ 2 - 170, 600, 350, null);
         }
+
         g.setColor(Color.BLUE);
-        g.drawOval(233 + noteIndex * 69, 415, 50, 50);
+        g.drawOval(233 + noteIndex * 69, 415, 50, 50); //this will draw the ovals to indicate the current note to be played next
+
+        g.setColor(Color.RED);
     }
 
-    public void startMusicTask() {
+    public void startMusicTask() { //starts it
         inMusicTask = true;
         noteIndex = 0;
-        JOptionPane.showMessageDialog(null, "Task: Play music to satisfy your elder in order to learn more about the history of fur trades.\nPress the keys in the order: a, b, c, d, e, f, g.");
     }
 
     public void play(char note) {
         try {
-            // Construct the file path to the note's audio file
+            // audio file
             File f = new File(System.getProperty("user.dir") + "/resources/" + note + ".wav");
 
-            // Load the audio file
+            // load the audio file
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(f);
 
-            // Create a clip to play the audio
+            // create a clip for the audio
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.start();
 
-            // Wait for the clip to finish playing
+            // wait for the clip to finish playing
             clip.addLineListener(new LineListener() {
                 @Override
                 public void update(LineEvent event) {
@@ -72,10 +75,10 @@ public class MusicTask extends Tasks {
         if (inMusicTask){
             char expectedNote = noteKeys[noteIndex];
             if (keyPressed == expectedNote) {
-                play(keyPressed); // Play the sound for the correct note
+                play(keyPressed); // play the sound for the correct note
                 noteIndex++;
                 if (noteIndex < notes.length) {
-                    // Continue to the next note
+                    // continue to the next note, do nothing
                 } else {
                     inMusicTask = false;
                     return "C1";
@@ -87,7 +90,7 @@ public class MusicTask extends Tasks {
             }
 
         }
-        return "";
+        return ""; //incomplete task
     }
 }
 

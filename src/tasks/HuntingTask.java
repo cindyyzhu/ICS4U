@@ -9,21 +9,19 @@ import java.util.Random;
 import java.util.*;
 
 public class HuntingTask extends Tasks{
-    public java.util.List<Point> animals = new ArrayList<>();
-    public Timer animalMovementTimer;
-
-    public Image beaverIcon;
+    public java.util.List<Point> animals = new ArrayList<>(); //list of animals
+    public Timer animalMovementTimer; //timer for the animal movement
+    public Image beaverIcon; //image of the beaver
 
     public HuntingTask () {
-        try {
+        try {//initialize the beaver icon
             beaverIcon = new ImageIcon(System.getProperty("user.dir") + "/resources/beaver.png").getImage();
         }
         catch (Exception e) {
 
         }
     }
-
-
+    //draw the hunting task
     public void drawHuntingTask (Graphics g, int taskTimer, int player_size, int taskTimeLimit){
 
         g.setColor(Color.WHITE);
@@ -33,14 +31,12 @@ public class HuntingTask extends Tasks{
         g.drawString("TASK: Hunt 5 beavers!", 10, 20);
         g.drawString("Score: " + huntScore, 10, 40);
         g.drawString("Time remaining: " + (taskTimeLimit - taskTimer) + " seconds", 10, 60);
+
         g.setColor(Color.RED);
 
-        for (Point animal : animals) {
+        for (Point animal : animals) { //for each animal, it will draw it
             if (beaverIcon != null) {
                 g.drawImage(beaverIcon, animal.x, animal.y, player_size+30, player_size+30, null);
-            } else {
-                g.setColor(Color.GRAY);
-                g.fillRect(animal.x, animal.y, player_size, player_size);
             }
         }
     }
@@ -57,19 +53,18 @@ public class HuntingTask extends Tasks{
                 break;
             }
         }
-        return "";
+        return ""; //task not complete
     }
     public void startHuntingTask(int windowWidth, int windowHeight) {
         inHuntingTask = true;
         huntScore = 0;
-        animals.clear();
+        animals.clear(); //clear the list of animals
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
-            animals.add(new Point(random.nextInt(windowWidth - 50), random.nextInt(windowHeight - 50)));
+            animals.add(new Point(random.nextInt(windowWidth - 50), random.nextInt(windowHeight - 50))); //add 5 animals to the list
         }
-        JOptionPane.showMessageDialog(null, "Task: Hunt 5 beavers. Click on the moving beavers to hunt them.");
 
-        animalMovementTimer = new Timer(400, new ActionListener() {
+        animalMovementTimer = new Timer(400, new ActionListener() { //allows it to move, decreasing the delay will move it faster
             @Override
             public void actionPerformed(ActionEvent e) {
                 moveAnimals(windowWidth, windowHeight);
@@ -78,7 +73,7 @@ public class HuntingTask extends Tasks{
         animalMovementTimer.start();
     }
 
-    public void moveAnimals(int windowWidth, int windowHeight) {
+    public void moveAnimals(int windowWidth, int windowHeight) { //moves the animals
         Random random = new Random();
         for (Point animal : animals) {
             animal.x = Math.max(0, Math.min(animal.x + random.nextInt(41) - 10, windowWidth - 100));

@@ -1,7 +1,7 @@
 package tasks;
 
 
-public class Tasks {
+public class Tasks { //this allows the tasks to be reset when the user wants to play again
     public boolean inMusicTask = false;
     public boolean inGatheringTask = false;
     public boolean inHuntingTask = false;
