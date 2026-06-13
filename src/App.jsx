@@ -222,6 +222,7 @@ export default function App() {
   }, [g.screen, g.activeTask]);
 
   return (
+    <>
     <div className="game-container" ref={containerRef} tabIndex={-1} style={{ outline: 'none' }}>
       {/* INTRO */}
       {g.screen === 'intro' && (
@@ -368,5 +369,9 @@ export default function App() {
         <AlertModal message={g.alert} onClose={() => g.setAlert(null)} />
       )}
     </div>
+    <footer className="footer">
+      Made with <span className="heart">♥</span> by Cindy Zhu 2026
+    </footer>
+    </>
   );
 }
