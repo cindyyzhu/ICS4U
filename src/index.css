@@ -1,0 +1,281 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Georgia', serif;
+  background: #1a0e00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.game-container {
+  width: 800px;
+  height: 600px;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid #8b6914;
+  box-shadow: 0 0 40px rgba(139, 105, 20, 0.5);
+}
+
+.game-canvas {
+  width: 800px;
+  height: 600px;
+  display: block;
+}
+
+/* Screen overlays */
+.screen {
+  position: absolute;
+  inset: 0;
+  width: 800px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.screen-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.screen-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Intro screen */
+.intro-title {
+  margin-top: 20px;
+  background: rgba(255,255,255,0.85);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #3b1f00;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Buttons */
+.btn {
+  background: #fff;
+  color: #222;
+  border: 2px solid #555;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 18px;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn:hover { background: #f0e8d0; transform: scale(1.04); }
+.btn:active { transform: scale(0.98); }
+.btn-row { display: flex; gap: 20px; }
+
+/* Modal dialog */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: #fff8ee;
+  border: 2px solid #8b6914;
+  border-radius: 10px;
+  padding: 32px 40px;
+  max-width: 420px;
+  text-align: center;
+  font-family: 'Georgia', serif;
+}
+.modal h2 { font-size: 20px; margin-bottom: 12px; color: #3b1f00; }
+.modal p { font-size: 15px; margin-bottom: 20px; color: #333; }
+.modal input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+.modal img { max-width: 100px; margin-bottom: 10px; }
+
+/* Game panel HUD */
+.hud {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.88);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #222;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Dialogue overlay */
+.dialogue-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  cursor: pointer;
+}
+.dialogue-overlay img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Task overlays */
+.task-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+}
+
+/* Music task */
+.music-task {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+}
+.music-task-inner {
+  background: #fff8ee;
+  border: 2px solid #8b6914;
+  border-radius: 10px;
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 600px;
+  width: 90%;
+}
+.music-task-inner h2 { font-size: 18px; margin-bottom: 8px; color: #3b1f00; }
+.music-notes-img { max-width: 540px; width: 100%; margin: 10px 0; }
+.note-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.note-dot {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 3px solid #999;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold; color: #444;
+  background: #f5f0e0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.note-dot.active { border-color: #1a5aff; background: #d0e4ff; }
+.note-dot.done { border-color: #228822; background: #c8f0c8; }
+
+/* Gathering & Hunting tasks (canvas-based) */
+.canvas-task {
+  position: absolute;
+  inset: 0;
+  width: 800px;
+  height: 600px;
+  cursor: crosshair;
+}
+
+/* Bartering task */
+.bartering-task {
+  position: absolute;
+  inset: 0;
+  width: 800px;
+  height: 600px;
+  overflow: hidden;
+  cursor: default;
+}
+.barter-shelf-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.barter-hud {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: rgba(255,255,255,0.88);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 5;
+}
+.barter-items {
+  position: absolute;
+  top: 150px; left: 0; right: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 20px;
+  z-index: 5;
+}
+.barter-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+  width: 160px;
+}
+.barter-item:hover { transform: scale(1.06); }
+.barter-item img { width: 140px; height: 140px; object-fit: contain; }
+.barter-item-name {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+  text-align: center;
+}
+.barter-sort-btns {
+  position: absolute;
+  bottom: 60px; left: 20px;
+  display: flex; gap: 12px;
+  z-index: 5;
+}
+.barter-sort-btns img { width: 110px; height: 44px; cursor: pointer; object-fit: contain; }
+.barter-sort-btns img:hover { opacity: 0.8; }
+
+/* End screens */
+.end-screen-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  z-index: 5;
+}
+.end-screen-text img { width: 600px; height: 350px; object-fit: contain; }
+.end-screen-btns {
+  position: absolute;
+  bottom: 100px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  z-index: 5;
+}
